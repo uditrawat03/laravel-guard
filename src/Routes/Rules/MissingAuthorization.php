@@ -7,10 +7,13 @@ use LaravelGuard\Core\Findings\Confidence;
 use LaravelGuard\Core\Findings\SecurityFinding;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Core\Rules\AbstractGuardRule;
+use LaravelGuard\Routes\AuthorizationInspector;
 use LaravelGuard\Routes\RouteAnalysis;
 
 final class MissingAuthorization extends AbstractGuardRule
 {
+    public function __construct(private readonly AuthorizationInspector $authorization) {}
+
     public function id(): string
     {
         return 'LG-ROUTE-002';
@@ -31,14 +34,20 @@ final class MissingAuthorization extends AbstractGuardRule
         return Severity::High;
     }
 
-    public function scan(SecurityContext $x): iterable
+    public function scan(SecurityContext $context): iterable
     {
-        $c = $x->config['routes'] ?? [];
-        foreach ($x->app['router']->getRoutes() as $r) {
-            $m = RouteAnalysis::middleware($r);
-            if (RouteAnalysis::sensitive($r, $c) && ! RouteAnalysis::public($r, $c) && RouteAnalysis::has($m, ['auth', 'auth.basic', 'sanctum']) && ! RouteAnalysis::has($m, $c['authorization_middleware'] ?? ['can'])) {
-                yield SecurityFinding::fromRule($this, "{$r->uri()} has authentication but no recognized authorization middleware.", 'An authenticated user may act outside their permissions.', 'Add can/permission middleware or verify controller policy and gate checks.', Confidence::Medium, metadata: RouteAnalysis::metadata($r));
+        $config = $context->config['routes'] ?? [];
+        foreach ($context->app['router']->getRoutes() as $route) {
+            $middleware = RouteAnalysis::middleware($route);
+            if (! RouteAnalysis::sensitive($route, $config) || RouteAnalysis::public($route, $config) || ! RouteAnalysis::has($middleware, ['auth', 'auth.basic', 'sanctum'])) {
+                continue;
             }
+
+            if (RouteAnalysis::has($middleware, $config['authorization_middleware'] ?? ['can']) || $this->authorization->controllerAuthorizes($route, $context)) {
+                continue;
+            }
+
+            yield SecurityFinding::fromRule($this, "{$route->uri()} has authentication but no recognized route or controller authorization.", 'An authenticated user may act outside their permissions.', 'Add can/permission middleware or call a policy or gate in the controller.', Confidence::Medium, metadata: RouteAnalysis::metadata($route));
         }
     }
 }

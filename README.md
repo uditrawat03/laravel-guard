@@ -1,6 +1,6 @@
 # Laravel Guard
 
-Laravel Guard is a Laravel-native security toolkit that reports risky configuration, sensitive routes, unsafe uploads, and tenant-isolation mistakes during development and CI. It detects and explains risk; it does not modify application code or replace a security review.
+Laravel Guard is a Laravel-native security toolkit for static, configuration, route, and runtime tenant analysis. It explains risks and produces CI-ready reports without rewriting application code. A clean scan is useful evidence, not proof that an application is secure.
 
 ## Compatibility
 
@@ -15,64 +15,84 @@ php artisan vendor:publish --tag=laravel-guard-config
 php artisan guard:scan
 ```
 
-Laravel package discovery registers the provider and commands automatically.
+Laravel package discovery registers the provider and commands automatically. PHP source is parsed with `nikic/php-parser`; application source is never executed by the scanner.
 
 ## Commands
 
 ```bash
 php artisan guard:scan
 php artisan guard:scan --module=routes --severity=high
-php artisan guard:scan --format=json
+php artisan guard:scan --format=sarif --output=guard.sarif
 php artisan guard:check --fail-on=high
+php artisan guard:diff main --fail-on=high
 php artisan guard:baseline
 php artisan guard:rules
+php artisan guard:benchmark --runs=10
 ```
 
-`guard:check` returns exit code 1 when a finding meets the selected threshold. A baseline stores stable finding fingerprints so legacy applications can fail CI only for new findings.
+Report formats are `console`, `json`, `sarif`, `github`, `junit`, `html`, and `log`. `guard:check` exits with code 1 at the configured threshold. Baselines use normalized, symbol-aware fingerprints so line movement alone does not revive an accepted finding.
 
-## Tenant protection
+## Coverage
 
-Bind a resolver and opt tenant-owned models into the guard:
+The default registry includes rules for:
+
+- Tenant model constraints, missing context, cross-tenant access, bulk mutations, and raw queries
+- Route authentication, authorization, throttling, administrative exposure, unsafe GET actions, and signed links
+- Upload validation, executable formats, public storage, size limits, path traversal, and SVG handling
+- Debug, session, CORS, key, filesystem, logging, proxy, database TLS, and mail configuration
+- SQL interpolation, raw SQL, bulk update/delete, mass assignment, and sensitive model serialization
+- Hardcoded and Git-tracked credentials, with secret values excluded from findings
+- API authentication, throttling, and unsafe resource exposure
+
+## Tenant Protection
+
+Bind a resolver and apply the trait to tenant-owned models:
 
 ```php
-use LaravelGuard\Tenant\Contracts\TenantOwned;
 use LaravelGuard\Tenant\Contracts\TenantResolver;
 use LaravelGuard\Tenant\GuardsTenant;
 
 $this->app->bind(TenantResolver::class, AppTenantResolver::class);
 
-final class Project extends Model implements TenantOwned
+final class Project extends Model
 {
     use GuardsTenant;
 }
 ```
 
-The trait adds an active-tenant global scope, fills the tenant column on creation, and throws on a retrieved cross-tenant model. Configure tenant model classes under `tenant.models` to audit their opt-in status.
+Configure the model class and table under `tenant.models` and `tenant.tables`. The trait applies a global scope, assigns the tenant key during creation, and blocks hydrated records carrying a different tenant key. Runtime DB inspection is disabled by default and should initially be enabled only in `local` and `testing`.
 
-## Custom rules
+Adapters are included for `spatie/laravel-multitenancy` and `stancl/tenancy`; neither package is required.
 
-Implement `LaravelGuard\Core\Contracts\GuardRule` and add the class to `custom_rules` in the published configuration, or register it at application boot with `LaravelGuard::registerRule(...)`.
+## Suppressions
 
-## Suppression
-
-Suppress a rule only for a specific file or symbol where possible:
+Prefer narrow suppressions with a documented reason:
 
 ```php
-'ignore' => [
-    'LG-ROUTE-002' => [
-        ['target' => 'admin.reports.export', 'reason' => 'Controller policy is verified separately'],
-    ],
-],
+use LaravelGuard\Attributes\GuardIgnore;
+
+#[GuardIgnore('LG-QUERY-002', reason: 'Static internal expression; no request input')]
+final class MonthlyRollup {}
 ```
 
-Blanket suppression is supported with `true`, but should be reviewed carefully. Never treat a high score or clean scan as proof that an application is secure.
+Configuration suppressions can target a route, file, symbol, or fingerprint. Scoped runtime exceptions use `LaravelGuard::allow($ruleId, $reason, $callback)` and never disable other rules globally.
+
+## Testing
+
+Add `LaravelGuard\Testing\LaravelGuardAssertions` to a PHPUnit test case, then use `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, or `assertTenantSafe()`.
+
+## Custom Extensions
+
+Implement `LaravelGuard\Core\Contracts\GuardRule` and list the class under `custom_rules`. Custom reporters implement `LaravelGuard\Core\Contracts\SecurityReporter` and are mapped by format name under `reporters`.
 
 ## CI
 
 ```yaml
 - name: Laravel Guard
-  run: php artisan guard:check --fail-on=high
+  run: php artisan guard:check --fail-on=high --format=github
 ```
+
+See [implementation status](docs/ROADMAP.md), [security policy](SECURITY.md), and [contributing guide](CONTRIBUTING.md).
 
 ## License
 

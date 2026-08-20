@@ -8,6 +8,7 @@ use LaravelGuard\Core\Findings\SecurityFinding;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Core\Rules\AbstractGuardRule;
 use LaravelGuard\Tenant\Contracts\TenantOwned;
+use LaravelGuard\Tenant\GuardsTenant;
 
 final class MissingTenantConstraint extends AbstractGuardRule
 {
@@ -31,11 +32,13 @@ final class MissingTenantConstraint extends AbstractGuardRule
         return Severity::Critical;
     }
 
-    public function scan(SecurityContext $c): iterable
+    public function scan(SecurityContext $context): iterable
     {
-        foreach ($c->config['tenant']['models'] ?? [] as $model) {
-            if (! class_exists($model) || ! is_subclass_of($model, TenantOwned::class)) {
-                yield SecurityFinding::fromRule($this, "Configured tenant model {$model} does not implement TenantOwned.", 'Queries may return records belonging to another tenant.', 'Implement TenantOwned and use the GuardsTenant trait.', Confidence::High, metadata: ['symbol' => $model]);
+        foreach ($context->config['tenant']['models'] ?? [] as $model) {
+            $usesGuard = class_exists($model) && in_array(GuardsTenant::class, class_uses_recursive($model), true);
+            $ownsTenant = class_exists($model) && is_subclass_of($model, TenantOwned::class);
+            if (! $usesGuard && ! $ownsTenant) {
+                yield SecurityFinding::fromRule($this, "Configured tenant model {$model} has no recognized tenant constraint.", 'Queries may return records belonging to another tenant.', 'Use the GuardsTenant trait or implement TenantOwned with an equivalent global scope.', Confidence::High, metadata: ['symbol' => $model]);
             }
         }
     }

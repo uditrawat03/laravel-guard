@@ -3,15 +3,14 @@
 namespace LaravelGuard\Uploads\Rules;
 
 use LaravelGuard\Core\Contracts\SecurityContext;
-use LaravelGuard\Core\Findings\Confidence;
 use LaravelGuard\Core\Findings\SecurityFinding;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Core\Rules\AbstractGuardRule;
-use LaravelGuard\Uploads\UploadAnalysis;
+use LaravelGuard\Core\Source\SourceIndex;
 
 final class UserControlledFilename extends AbstractGuardRule
 {
-    public function __construct(private readonly UploadAnalysis $analysis) {}
+    public function __construct(private readonly SourceIndex $sources) {}
 
     public function id(): string
     {
@@ -33,19 +32,10 @@ final class UserControlledFilename extends AbstractGuardRule
         return Severity::High;
     }
 
-    public function scan(SecurityContext $c): iterable
+    public function scan(SecurityContext $context): iterable
     {
-        foreach ($this->analysis->sources($c) as $file => $source) {
-            if (preg_match_all('/(?:getClientOriginalName|getClientOriginalExtension)\s*\(/', $source, $hits, PREG_OFFSET_CAPTURE)) {
-                foreach ($hits[0] as [$match,$offset]) {
-                    yield SecurityFinding::fromRule($this, 'An original client filename or extension is used in upload handling.', 'Client-controlled names may enable path traversal, collisions, or dangerous extensions.', 'Generate a server-side name and allowlist the validated extension.', $this->confidence(), $file, $this->analysis->line($source, $offset), ['symbol' => $match]);
-                }
-            }
+        foreach ($this->sources->calls($context, ['getClientOriginalName', 'getClientOriginalExtension']) as $call) {
+            yield SecurityFinding::fromRule($this, 'An original client filename or extension is used in upload handling.', 'Client-controlled names may enable path traversal, collisions, or dangerous extensions.', 'Generate a server-side name and allowlist the validated extension.', file: $call->file->path, line: $call->line(), metadata: ['symbol' => $call->symbol, 'code' => $call->code()]);
         }
-    }
-
-    private function confidence(): Confidence
-    {
-        return Confidence::High;
     }
 }

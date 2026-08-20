@@ -15,8 +15,15 @@ final readonly class PhpFileScanner
             if (! $this->files->exists($path)) {
                 continue;
             }
-            $files = $this->files->isDirectory($path) ? $this->files->allFiles($path) : [$this->files->getFile($path)];
-            foreach ($files as $file) {
+            if (! $this->files->isDirectory($path)) {
+                $real = $this->normalize((string) realpath($path));
+                if (pathinfo($real, PATHINFO_EXTENSION) === 'php' && ! $this->excluded($real, $excluded)) {
+                    yield $real => $this->files->get($real);
+                }
+
+                continue;
+            }
+            foreach ($this->files->allFiles($path) as $file) {
                 $real = $this->normalize($file->getRealPath());
                 if ($file->getExtension() !== 'php' || $this->excluded($real, $excluded)) {
                     continue;
@@ -44,6 +51,6 @@ final readonly class PhpFileScanner
             }
         }
 
-return false;
+        return false;
     }
 }

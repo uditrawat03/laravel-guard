@@ -4,13 +4,31 @@ namespace LaravelGuard\Tenant;
 
 use LaravelGuard\Tenant\Contracts\TenantResolver;
 
-final readonly class TenantContext
+final class TenantContext
 {
-    public function __construct(private ?TenantResolver $resolver) {}
+    private string|int|null $tenantId = null;
+
+    private bool $resolved = false;
+
+    private bool $resolving = false;
+
+    public function __construct(private readonly ?TenantResolver $resolver) {}
 
     public function id(): string|int|null
     {
-        return $this->resolver?->currentTenantId();
+        if (($this->resolved && $this->tenantId !== null) || $this->resolving) {
+            return $this->tenantId;
+        }
+
+        $this->resolving = true;
+        try {
+            $this->tenantId = $this->resolver?->currentTenantId();
+            $this->resolved = true;
+        } finally {
+            $this->resolving = false;
+        }
+
+        return $this->tenantId;
     }
 
     public function active(): bool
