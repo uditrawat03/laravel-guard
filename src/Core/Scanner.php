@@ -18,15 +18,18 @@ final readonly class Scanner
         if (! ($context->config['enabled'] ?? true)) {
             return $findings;
         }
+
         foreach ($this->rules->all() as $rule) {
             if ($context->module && $rule->category() !== $context->module) {
                 continue;
             }
+
             if (! ($context->config['modules'][$rule->category()] ?? true)) {
                 continue;
             }
+
             foreach ($rule->scan($context) as $finding) {
-                if ($finding instanceof SecurityFinding && ! $this->suppressions->suppressed($finding, $context->config['ignore'] ?? [])) {
+                if ($finding instanceof SecurityFinding && ! $this->suppressions->suppressed($finding, $context)) {
                     $findings->add($finding);
                 }
             }

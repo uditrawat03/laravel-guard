@@ -36,7 +36,13 @@ final readonly class SecurityFinding implements JsonSerializable
 
     public function fingerprint(): string
     {
-        $identity = [$this->ruleId, $this->location->file, $this->location->line, $this->metadata['symbol'] ?? $this->description];
+        $code = preg_replace('/\s+/', ' ', trim((string) ($this->metadata['code'] ?? '')));
+        $identity = [
+            $this->ruleId,
+            $this->stableFile(),
+            $this->metadata['symbol'] ?? null,
+            $code !== '' ? $code : preg_replace('/\s+/', ' ', trim($this->description)),
+        ];
 
         return hash('sha256', json_encode($identity, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
     }
@@ -44,10 +50,34 @@ final readonly class SecurityFinding implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'fingerprint' => $this->fingerprint(), 'rule_id' => $this->ruleId, 'category' => $this->category,
-            'severity' => strtolower($this->severity->name), 'confidence' => $this->confidence->value,
-            'title' => $this->title, 'description' => $this->description, 'risk' => $this->risk,
-            'recommendation' => $this->recommendation, ...$this->location->toArray(), 'metadata' => $this->metadata,
+            'fingerprint' => $this->fingerprint(),
+            'rule_id' => $this->ruleId,
+            'category' => $this->category,
+            'severity' => strtolower($this->severity->name),
+            'confidence' => $this->confidence->value,
+            'title' => $this->title,
+            'description' => $this->description,
+            'risk' => $this->risk,
+            'recommendation' => $this->recommendation,
+            ...$this->location->toArray(),
+            'metadata' => $this->metadata,
         ];
+    }
+
+    private function stableFile(): ?string
+    {
+        if ($this->location->file === null) {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', $this->location->file);
+        foreach (['/app/', '/routes/', '/config/', '/database/', '/resources/'] as $anchor) {
+            $position = strpos($path, $anchor);
+            if ($position !== false) {
+                return ltrim(substr($path, $position), '/');
+            }
+        }
+
+        return basename($path);
     }
 }

@@ -2,10 +2,11 @@
 
 namespace LaravelGuard\Commands\Concerns;
 
+use Illuminate\Filesystem\Filesystem;
 use LaravelGuard\Core\Findings\FindingCollection;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Core\Reporting\ConsoleReporter;
-use LaravelGuard\Core\Reporting\JsonReporter;
+use LaravelGuard\Core\Reporting\ReportManager;
 use LaravelGuard\LaravelGuard;
 
 trait ScansApplication
@@ -20,10 +21,19 @@ trait ScansApplication
 
     protected function report(FindingCollection $findings): void
     {
-        if ($this->option('format') === 'json') {
-            $this->line($this->laravel->make(JsonReporter::class)->render($findings));
-        } else {
+        $format = strtolower((string) $this->option('format'));
+        if ($format === 'console') {
             $this->laravel->make(ConsoleReporter::class)->render($this, $findings);
+
+            return;
+        }
+        $report = $this->laravel->make(ReportManager::class)->render($format, $findings);
+        $output = $this->option('output');
+        if ($output) {
+            $this->laravel->make(Filesystem::class)->put($output, $report.PHP_EOL);
+            $this->components->info("Security report written to {$output}.");
+        } elseif ($report !== '') {
+            $this->line($report);
         }
     }
 }

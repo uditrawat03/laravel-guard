@@ -22,20 +22,21 @@ final class RouteAnalysis
             }
         }
 
-return false;
+        return false;
     }
 
     public static function sensitive(Route $r, array $c): bool
     {
         if (array_intersect($r->methods(), $c['sensitive_methods'] ?? [])) {
             return true;
-        }foreach ($c['sensitive_patterns'] ?? [] as $p) {
+        }
+        foreach ($c['sensitive_patterns'] ?? [] as $p) {
             if (Str::is($p, $r->uri()) || Str::is($p, (string) $r->getName())) {
                 return true;
             }
         }
 
-return false;
+        return false;
     }
 
     public static function public(Route $r, array $c): bool
@@ -46,7 +47,7 @@ return false;
             }
         }
 
-return false;
+        return false;
     }
 
     public static function metadata(Route $r): array

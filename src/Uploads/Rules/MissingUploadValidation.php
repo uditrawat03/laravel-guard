@@ -7,11 +7,11 @@ use LaravelGuard\Core\Findings\Confidence;
 use LaravelGuard\Core\Findings\SecurityFinding;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Core\Rules\AbstractGuardRule;
-use LaravelGuard\Uploads\UploadAnalysis;
+use LaravelGuard\Core\Source\SourceIndex;
 
 final class MissingUploadValidation extends AbstractGuardRule
 {
-    public function __construct(private readonly UploadAnalysis $analysis) {}
+    public function __construct(private readonly SourceIndex $sources) {}
 
     public function id(): string
     {
@@ -33,17 +33,20 @@ final class MissingUploadValidation extends AbstractGuardRule
         return Severity::High;
     }
 
-    public function scan(SecurityContext $c): iterable
+    public function scan(SecurityContext $context): iterable
     {
-        foreach ($this->analysis->sources($c) as $file => $source) {
-            if (! preg_match_all('/(?:->file\s*\(|UploadedFile\b)/', $source, $hits, PREG_OFFSET_CAPTURE)) {
-                continue;
-            }$validated = (bool) preg_match('/(?:validate|rules)\s*\([^;]*(?:file|image|mimes|mimetypes|max)\b/s', $source);
-            if (! $validated) {
-                foreach ($hits[0] as [$match,$offset]) {
-                    yield SecurityFinding::fromRule($this, 'File upload use was detected without recognizable file validation in the same source file.', 'Unvalidated files can contain unexpected types or oversized content.', 'Validate file type, MIME, extension, and size before storage.', Confidence::Medium, $file, $this->analysis->line($source, $offset), ['symbol' => $match]);
-                }
+        $validated = [];
+        foreach ($this->sources->calls($context, ['validate', 'validated', 'rules']) as $call) {
+            if (preg_match('/\b(file|image|mimes|mimetypes)\b/i', $call->code())) {
+                $validated[$call->file->path][$call->symbol ?? '*'] = true;
             }
+        }
+
+        foreach ($this->sources->calls($context, ['file', 'hasFile', 'store', 'storeAs', 'storePublicly', 'storePubliclyAs', 'move']) as $call) {
+            if (isset($validated[$call->file->path][$call->symbol ?? '*'])) {
+                continue;
+            }
+            yield SecurityFinding::fromRule($this, "{$call->name}() is used without recognizable file validation in the same method.", 'Unvalidated files can contain unexpected types or oversized content.', 'Validate file type, MIME, extension, and size before storage.', Confidence::Medium, $call->file->path, $call->line(), ['symbol' => $call->symbol, 'code' => $call->code()]);
         }
     }
 }

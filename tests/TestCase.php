@@ -14,6 +14,7 @@ abstract class TestCase extends Orchestra
 
     protected function defineEnvironment($app): void
     {
+        $app['config']->set('app.key', 'base64:'.base64_encode(str_repeat('g', 32)));
         $app['config']->set('app.debug', false);
         $app['config']->set('session.http_only', true);
         $app['config']->set('session.secure', true);

@@ -1,50 +1,34 @@
 # Laravel Guard implementation status
 
-This file tracks the blueprint against the current package. Completed means a usable first implementation exists; it does not imply the API is stable for v1.
+This document tracks the implementation blueprint. “Complete” means a tested first implementation exists; public APIs may still change before v1.
 
-## Completed MVP
+## Implemented
 
-- Composer package discovery for Laravel 10 through 13 and PHP 8.2+
-- Shared `GuardRule` contract, registry, scanner context, severity, confidence, findings, collections, and stable fingerprints
-- Console and JSON reporters
-- Configuration rules for production debug, session cookies, and broad credentialed CORS
-- Route rules for authentication, authorization, and rate limiting
-- Upload source rules for missing validation and client-controlled filenames
-- Vendor-neutral tenant resolver, tenant-owned model contract, Eloquent global scope, automatic tenant assignment, and cross-tenant retrieval blocking
-- Configuration and symbol/file suppressions
-- Custom rule registration
-- `guard:scan`, `guard:check`, `guard:baseline`, and `guard:rules`
-- CI severity thresholds and baseline filtering
-- Route and finding PHPUnit assertions
-- Laravel 13 hospital consumer application
+- Laravel 10-13 / PHP 8.2+ package discovery, configuration publishing, facade, rule registry, and custom rules
+- AST source index with name/symbol annotation, per-content caching, `GuardIgnore`, config suppressions, stable normalized fingerprints, and scoped security exceptions
+- Configuration, route, tenant, upload, query, model, secret, API, and optional runtime modules
+- Tenant Eloquent scope and assignment, cross-tenant blocking, query event collection, re-entrancy-safe request context, Spatie Multitenancy resolver, and stancl/tenancy resolver
+- Controller authorization call inspection plus recognized authentication, authorization, throttle, signed-link, and administrative route middleware
+- Console, JSON, SARIF 2.1, GitHub annotation, JUnit, HTML, log, and custom reporter output
+- Severity/confidence model, security score with limitations, baseline snapshots, changed-line Git diff, and CI thresholds
+- `guard:scan`, `guard:check`, `guard:diff`, `guard:baseline`, `guard:rules`, and `guard:benchmark`
+- PHPUnit route, finding, and runtime tenant assertions
+- Responsible disclosure policy, contribution guide, compatibility workflow, and benchmark command
+- A multi-organization hospital SaaS consumer exercising runtime tenant protection and all static modules
 
-## Pending before v1
+## Pending Before v1
 
-- PHP AST parsing to replace regular-expression upload analysis and improve controller-level authorization detection
-- `GuardIgnore` attribute resolution; the attribute exists but the scanner does not yet read it
-- Audited exception context for `LaravelGuard::allow`; it validates a reason but does not yet scope and record a specific rule exception
-- Tenant query event findings for cross-tenant access, unsafe bulk update/delete, and raw tenant queries
-- Upload rules for dangerous executable extensions, public executable storage, MIME mismatch, SVG sanitization, size limits, and path traversal
-- Configuration checks for APP_KEY, trusted proxies, filesystem visibility, logging exposure, database TLS, and mail security
-- Route rules for administrative public routes, unsafe GET actions, and missing signed middleware
-- Policy/controller source inspection for `$this->authorize`, gates, and policy registration
-- Security score with clearly documented limitations
-- SARIF, GitHub annotation, log, HTML, and JUnit reporters
-- `guard:diff` and Git-aware new/resolved finding comparison
-- Baseline fingerprint resilience based on normalized code and AST symbols rather than line numbers
-- Dedicated security policy and responsible-disclosure process
-- Compatibility CI matrix across PHP 8.2–8.5 and Laravel 10–13
-- Performance benchmarks and scanner caching
+- True file-content/MIME signature inspection requires a runtime upload hook; static rules currently verify validation declarations and storage behavior
+- Security diff reports introduced findings on changed lines, but does not yet reconstruct and display resolved findings from a historical Git worktree
+- Authorization analysis is method-local; interprocedural call graphs, policy auto-discovery, and data-flow taint analysis are not implemented
+- First-party Telescope and Debugbar panels and a Spatie Permission presentation adapter remain; current middleware recognition and vendor-neutral extension points work without them
+- PHPStan extension rules, mutation/fuzz testing, signed release automation, changelog policy, and a documented backwards-compatibility promise are still required for a stable v1 tag
 
-## Post-v1 modules
+## Post-v1
 
-- Query Guard: SQL interpolation, unsafe raw SQL, unscoped bulk mutations
-- Model Guard: mass assignment and sensitive serialization
-- Secret Guard with mandatory value masking
-- API Guard for Sanctum, Passport, resource exposure, and API debug output
-- Optional Runtime Guard and security event collection
-- Spatie Permission, Spatie Multitenancy, stancl/tenancy, Telescope, and Debugbar integrations
-- PHPStan integration and deeper static-analysis engine
-- Optional reporting dashboard and hosted reporting layer
+- Framework-wide taint analysis and IDE/LSP diagnostics
+- Runtime request correlation, OpenTelemetry export, and centralized rule policy distribution
+- Optional hosted findings dashboard, organization policy packs, and pull-request trend analytics
+- Additional database and tenancy adapters driven by community demand
 
-The package remains an application-aware security aid. A clean scan does not replace code review, dependency scanning, dynamic testing, or penetration testing.
+Laravel Guard remains one defense layer. It does not replace code review, dependency scanning, dynamic testing, infrastructure hardening, or penetration testing.

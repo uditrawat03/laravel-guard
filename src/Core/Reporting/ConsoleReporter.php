@@ -4,6 +4,7 @@ namespace LaravelGuard\Core\Reporting;
 
 use Illuminate\Console\Command;
 use LaravelGuard\Core\Findings\FindingCollection;
+use LaravelGuard\Core\Scoring\SecurityScore;
 
 final class ConsoleReporter
 {
@@ -11,21 +12,27 @@ final class ConsoleReporter
     {
         $command->newLine();
         $command->components->info('Laravel Guard Security Scan');
-        $c = $findings->counts();
-        $command->table(['Severity', 'Findings'], [['CRITICAL', $c['critical']], ['HIGH', $c['high']], ['MEDIUM', $c['medium']], ['LOW', $c['low']]]);
+        $counts = $findings->counts();
+        $score = SecurityScore::fromFindings($findings);
+        $command->table(['Severity', 'Findings'], [['CRITICAL', $counts['critical']], ['HIGH', $counts['high']], ['MEDIUM', $counts['medium']], ['LOW', $counts['low']]]);
+        $command->line("Security score: <options=bold>{$score->score} / 100 ({$score->grade})</>");
         if ($findings->count() === 0) {
             $command->components->info('No security findings detected.');
+            $command->comment('A clean scan is not proof of application security.');
 
             return;
-        }foreach ($findings as $f) {
+        }
+        foreach ($findings as $finding) {
             $command->newLine();
-            $command->line("<options=bold>{$f->severity->label()}  {$f->ruleId}  {$f->title}</>");
-            $command->line($f->description);
-            if ($f->location->file) {
-                $command->line("Location: {$f->location->file}".($f->location->line ? ":{$f->location->line}" : ''));
-            }$command->line("Confidence: {$f->confidence->label()}");
-            $command->line("Recommendation: {$f->recommendation}");
-        }$command->newLine();
+            $command->line("<options=bold>{$finding->severity->label()}  {$finding->ruleId}  {$finding->title}</>");
+            $command->line($finding->description);
+            if ($finding->location->file) {
+                $command->line("Location: {$finding->location->file}".($finding->location->line ? ":{$finding->location->line}" : ''));
+            }
+            $command->line("Confidence: {$finding->confidence->label()}");
+            $command->line("Recommendation: {$finding->recommendation}");
+        }
+        $command->newLine();
         $command->warn("{$findings->count()} finding(s) detected. A clean scan is not proof of application security.");
     }
 }

@@ -11,7 +11,7 @@ final class MissingTenantContext extends AbstractGuardRule
 {
     public function id(): string
     {
-        return 'LG-TENANT-002';
+        return 'LG-TENANT-003';
     }
 
     public function name(): string
@@ -29,9 +29,9 @@ final class MissingTenantContext extends AbstractGuardRule
         return Severity::Critical;
     }
 
-    public function scan(SecurityContext $c): iterable
+    public function scan(SecurityContext $context): iterable
     {
-        if (($c->config['tenant']['models'] ?? []) !== [] && empty($c->config['tenant']['resolver'])) {
+        if (($context->config['tenant']['models'] ?? []) !== [] && empty($context->config['tenant']['resolver'])) {
             yield SecurityFinding::fromRule($this, 'Tenant models are configured but no TenantResolver binding is configured.', 'Tenant scopes cannot identify the active tenant.', 'Set laravel-guard.tenant.resolver to a TenantResolver implementation.');
         }
     }

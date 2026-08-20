@@ -9,7 +9,7 @@ final class ScanCommand extends Command
 {
     use ScansApplication;
 
-    protected $signature = 'guard:scan {--module= : Scan one module} {--severity= : Minimum displayed severity} {--format=console : console or json}';
+    protected $signature = 'guard:scan {--module= : Scan one module} {--severity= : Minimum displayed severity} {--format=console : console, json, sarif, github, junit, html, log, or a custom reporter} {--output= : Write non-console output to a file}';
 
     protected $description = 'Scan the application for Laravel security risks';
 
