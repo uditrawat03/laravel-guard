@@ -14,6 +14,12 @@ final class SecurityEventCollector
     }
 
     /** @return list<SecurityEvent> */
+    public function all(): array
+    {
+        return $this->events;
+    }
+
+    /** @return list<SecurityEvent> */
     public function forRule(string $ruleId): array
     {
         return array_values(array_filter($this->events, fn (SecurityEvent $event) => $event->ruleId === $ruleId));

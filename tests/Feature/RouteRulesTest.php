@@ -2,8 +2,10 @@
 
 namespace LaravelGuard\Tests\Feature;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
 use LaravelGuard\LaravelGuard;
+use LaravelGuard\Tests\Fixtures\ResourceController;
 use LaravelGuard\Tests\TestCase;
 
 final class RouteRulesTest extends TestCase
@@ -21,4 +23,22 @@ final class RouteRulesTest extends TestCase
         Route::delete('admin/users/{user}', fn () => null)->middleware(['auth', 'can:delete,user', 'throttle:api']);
         $this->assertCount(0, $this->app->make(LaravelGuard::class)->scan('routes'));
     }
+
+    public function test_authorize_resource_protects_all_controller_actions(): void
+    {
+        Route::delete('documents/{document}', [ResourceController::class, 'destroy'])->middleware(['auth', 'throttle:api']);
+        $ids = array_map(fn ($finding) => $finding->ruleId, $this->app->make(LaravelGuard::class)->scan('routes')->all());
+
+        $this->assertNotContains('LG-ROUTE-002', $ids);
+    }
+
+    public function test_configured_model_without_policy_is_reported(): void
+    {
+        $this->app['config']->set('laravel-guard.routes.policy_models', [UnprotectedPolicyModel::class]);
+        $ids = array_map(fn ($finding) => $finding->ruleId, $this->app->make(LaravelGuard::class)->scan('routes')->all());
+
+        $this->assertContains('LG-ROUTE-007', $ids);
+    }
 }
+
+final class UnprotectedPolicyModel extends Model {}

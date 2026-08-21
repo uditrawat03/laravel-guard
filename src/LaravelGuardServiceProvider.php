@@ -18,48 +18,32 @@ use LaravelGuard\Runtime\SecurityEventCollector;
 use LaravelGuard\Tenant\Contracts\TenantResolver;
 use LaravelGuard\Tenant\TenantContext;
 use LaravelGuard\Tenant\TenantQueryInspector;
+use LaravelGuard\Uploads\Runtime\InspectUploadedFiles;
 
 final class LaravelGuardServiceProvider extends ServiceProvider
 {
     private const RULES = [
-        Configuration\Rules\ProductionDebugEnabled::class,
-        Configuration\Rules\WeakSessionConfiguration::class,
-        Configuration\Rules\OverlyBroadCors::class,
-        Configuration\Rules\MissingApplicationKey::class,
-        Configuration\Rules\PublicSensitiveFilesystem::class,
-        Configuration\Rules\InsecureLoggingConfiguration::class,
-        Configuration\Rules\MissingDatabaseTls::class,
-        Configuration\Rules\InsecureMailTransport::class,
+        Configuration\Rules\ProductionDebugEnabled::class, Configuration\Rules\WeakSessionConfiguration::class,
+        Configuration\Rules\OverlyBroadCors::class, Configuration\Rules\MissingApplicationKey::class,
+        Configuration\Rules\PublicSensitiveFilesystem::class, Configuration\Rules\InsecureLoggingConfiguration::class,
+        Configuration\Rules\MissingDatabaseTls::class, Configuration\Rules\InsecureMailTransport::class,
         Configuration\Rules\OverlyTrustedProxies::class,
-        Routes\Rules\MissingAuthentication::class,
-        Routes\Rules\MissingAuthorization::class,
-        Routes\Rules\MissingRateLimit::class,
-        Routes\Rules\PublicAdministrativeRoute::class,
-        Routes\Rules\SensitiveGetAction::class,
-        Routes\Rules\UnsignedSensitiveAction::class,
-        Uploads\Rules\MissingUploadValidation::class,
-        Uploads\Rules\UserControlledFilename::class,
-        Uploads\Rules\DangerousUploadExtension::class,
-        Uploads\Rules\PublicExecutableUpload::class,
-        Uploads\Rules\MissingUploadSizeRestriction::class,
-        Uploads\Rules\UploadPathTraversal::class,
+        Routes\Rules\MissingAuthentication::class, Routes\Rules\MissingAuthorization::class,
+        Routes\Rules\MissingRateLimit::class, Routes\Rules\PublicAdministrativeRoute::class,
+        Routes\Rules\SensitiveGetAction::class, Routes\Rules\UnsignedSensitiveAction::class,
+        Routes\Rules\MissingPolicyRegistration::class,
+        Uploads\Rules\MissingUploadValidation::class, Uploads\Rules\UserControlledFilename::class,
+        Uploads\Rules\DangerousUploadExtension::class, Uploads\Rules\PublicExecutableUpload::class,
+        Uploads\Rules\MissingUploadSizeRestriction::class, Uploads\Rules\UploadPathTraversal::class,
         Uploads\Rules\UnsanitizedSvgUpload::class,
-        Tenant\Rules\MissingTenantConstraint::class,
-        Tenant\Rules\CrossTenantAccess::class,
-        Tenant\Rules\MissingTenantContext::class,
-        Tenant\Rules\UnsafeTenantUpdate::class,
-        Tenant\Rules\UnsafeTenantDelete::class,
-        Tenant\Rules\UnsafeRawTenantQuery::class,
-        Queries\Rules\PotentialSqlInjection::class,
-        Queries\Rules\UnsafeRawSql::class,
-        Queries\Rules\UnsafeBulkUpdate::class,
-        Queries\Rules\UnsafeBulkDelete::class,
-        Models\Rules\UnsafeMassAssignment::class,
-        Models\Rules\SensitiveAttributeExposure::class,
-        Secrets\Rules\HardcodedSecret::class,
-        Secrets\Rules\CommittedCredential::class,
-        Api\Rules\MissingApiAuthentication::class,
-        Api\Rules\MissingApiRateLimit::class,
+        Tenant\Rules\MissingTenantConstraint::class, Tenant\Rules\CrossTenantAccess::class,
+        Tenant\Rules\MissingTenantContext::class, Tenant\Rules\UnsafeTenantUpdate::class,
+        Tenant\Rules\UnsafeTenantDelete::class, Tenant\Rules\UnsafeRawTenantQuery::class,
+        Queries\Rules\PotentialSqlInjection::class, Queries\Rules\UnsafeRawSql::class,
+        Queries\Rules\UnsafeBulkUpdate::class, Queries\Rules\UnsafeBulkDelete::class,
+        Models\Rules\UnsafeMassAssignment::class, Models\Rules\SensitiveAttributeExposure::class,
+        Secrets\Rules\HardcodedSecret::class, Secrets\Rules\CommittedCredential::class,
+        Api\Rules\MissingApiAuthentication::class, Api\Rules\MissingApiRateLimit::class,
         Api\Rules\UnsafeApiResourceExposure::class,
     ];
 
@@ -82,6 +66,7 @@ final class LaravelGuardServiceProvider extends ServiceProvider
     public function boot(RuleRegistry $registry): void
     {
         $this->publishes([__DIR__.'/../config/laravel-guard.php' => config_path('laravel-guard.php')], 'laravel-guard-config');
+        $this->app['router']->aliasMiddleware('guard.uploads', InspectUploadedFiles::class);
         foreach ([...self::RULES, ...config('laravel-guard.custom_rules', [])] as $rule) {
             $registry->register($rule);
         }
@@ -91,10 +76,7 @@ final class LaravelGuardServiceProvider extends ServiceProvider
             });
         }
         if ($this->app->runningInConsole()) {
-            $this->commands([
-                ScanCommand::class, CheckCommand::class, DiffCommand::class,
-                BaselineCommand::class, ListRulesCommand::class, BenchmarkCommand::class,
-            ]);
+            $this->commands([ScanCommand::class, CheckCommand::class, DiffCommand::class, BaselineCommand::class, ListRulesCommand::class, BenchmarkCommand::class]);
         }
     }
 
