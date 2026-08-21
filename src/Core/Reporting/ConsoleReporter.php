@@ -11,13 +11,13 @@ final class ConsoleReporter
     public function render(Command $command, FindingCollection $findings): void
     {
         $command->newLine();
-        $command->components->info('Laravel Guard Security Scan');
+        $command->info('Laravel Guard Security Scan');
         $counts = $findings->counts();
         $score = SecurityScore::fromFindings($findings);
         $command->table(['Severity', 'Findings'], [['CRITICAL', $counts['critical']], ['HIGH', $counts['high']], ['MEDIUM', $counts['medium']], ['LOW', $counts['low']]]);
         $command->line("Security score: <options=bold>{$score->score} / 100 ({$score->grade})</>");
         if ($findings->count() === 0) {
-            $command->components->info('No security findings detected.');
+            $command->info('No security findings detected.');
             $command->comment('A clean scan is not proof of application security.');
 
             return;
