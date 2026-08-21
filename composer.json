@@ -18,12 +18,24 @@
         "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
         "phpunit/phpunit": "^10.5|^11.0|^12.0"
     },
+    "suggest": {
+        "barryvdh/laravel-debugbar": "Publishes an opt-in scan summary to Debugbar.",
+        "infection/infection": "Runs the optional mutation testing configuration.",
+        "laravel/telescope": "Publishes an opt-in scan summary event for Telescope.",
+        "phpstan/phpstan": "Enables the tenant-model PHPStan rule.",
+        "spatie/laravel-multitenancy": "Enables the Spatie tenant resolver adapter.",
+        "spatie/laravel-permission": "Enables recognition of Spatie authorization middleware.",
+        "stancl/tenancy": "Enables the stancl tenant resolver adapter."
+    },
     "autoload": {"psr-4": {"LaravelGuard\\": "src/"}},
     "autoload-dev": {"psr-4": {"LaravelGuard\\Tests\\": "tests/"}},
     "extra": {
         "laravel": {
             "providers": ["LaravelGuard\\LaravelGuardServiceProvider"],
             "aliases": {"LaravelGuard": "LaravelGuard\\Facades\\LaravelGuard"}
+        },
+        "phpstan": {
+            "includes": ["extension.neon"]
         }
     },
     "scripts": {

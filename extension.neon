@@ -1,0 +1,11 @@
+parameters:
+    laravelGuard:
+        tenantModels: []
+
+services:
+    -
+        class: LaravelGuard\Integrations\PHPStan\TenantModelRule
+        arguments:
+            tenantModelClasses: %laravelGuard.tenantModels%
+        tags:
+            - phpstan.rules.rule

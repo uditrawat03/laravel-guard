@@ -1,0 +1,7 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": { "directories": ["src"] },
+    "logs": { "text": "build/infection.log" },
+    "minMsi": 70,
+    "minCoveredMsi": 80
+}
