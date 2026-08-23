@@ -4,6 +4,7 @@ namespace LaravelGuard\Core\Diff;
 
 use JsonSerializable;
 use LaravelGuard\Core\Findings\FindingCollection;
+use LaravelGuard\Core\Support\OutputSchema;
 
 final readonly class SecurityDiff implements JsonSerializable
 {
@@ -27,6 +28,8 @@ final readonly class SecurityDiff implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
+            'schema' => OutputSchema::DIFF,
+            'schema_version' => OutputSchema::DIFF_VERSION,
             'summary' => ['introduced' => $this->introduced->count(), 'resolved' => count($this->resolved)],
             'introduced' => $this->introduced,
             'resolved' => $this->resolved,

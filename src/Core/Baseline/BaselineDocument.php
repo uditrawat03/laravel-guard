@@ -5,10 +5,11 @@ namespace LaravelGuard\Core\Baseline;
 use DateTimeImmutable;
 use JsonSerializable;
 use LaravelGuard\Core\Findings\FindingCollection;
+use LaravelGuard\Core\Support\OutputSchema;
 
 final readonly class BaselineDocument implements JsonSerializable
 {
-    public const SCHEMA_VERSION = 3;
+    public const SCHEMA_VERSION = OutputSchema::BASELINE_VERSION;
 
     /** @param list<BaselineEntry> $entries */
     public function __construct(public array $entries, public string $generatedAt, public int $sourceSchema = self::SCHEMA_VERSION) {}
@@ -82,6 +83,7 @@ final readonly class BaselineDocument implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
+            'schema' => OutputSchema::BASELINE,
             'schema_version' => self::SCHEMA_VERSION,
             'generated_at' => $this->generatedAt,
             'fingerprints' => array_map(fn (BaselineEntry $entry) => $entry->fingerprint, $this->entries),

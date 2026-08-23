@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:laravel-guard:schema:diff:1",
+  "title": "Laravel Guard security diff v1",
+  "type": "object",
+  "required": ["schema", "schema_version", "summary", "introduced", "resolved"],
+  "properties": {
+    "schema": {"const": "laravel-guard/diff"},
+    "schema_version": {"const": 1},
+    "summary": {
+      "type": "object",
+      "required": ["introduced", "resolved"],
+      "properties": {
+        "introduced": {"type": "integer", "minimum": 0},
+        "resolved": {"type": "integer", "minimum": 0}
+      }
+    },
+    "introduced": {"type": "array", "items": {"type": "object"}},
+    "resolved": {"type": "array", "items": {"type": "object"}}
+  }
+}

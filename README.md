@@ -58,6 +58,7 @@ php artisan guard:benchmark --runs=10
 `guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt. Governed baselines record an owner, acceptance reason, and expiration; expired entries automatically stop suppressing findings.
 
 See [Baseline governance](docs/BASELINES.md) for schema compatibility, maintenance commands, CI behavior, and configuration.
+Machine-readable outputs carry independent schema identities and versions. See [Output schemas](docs/OUTPUT_SCHEMAS.md) for contract definitions and compatibility rules, and [Upgrading](docs/UPGRADING.md) for consumer migration notes.
 
 ## Security Coverage
 

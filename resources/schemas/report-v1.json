@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:laravel-guard:schema:report:1",
+  "title": "Laravel Guard JSON report v1",
+  "type": "object",
+  "required": ["schema", "schema_version", "summary", "total", "score", "findings"],
+  "properties": {
+    "schema": {"const": "laravel-guard/report"},
+    "schema_version": {"const": 1},
+    "summary": {
+      "type": "object",
+      "required": ["critical", "high", "medium", "low"],
+      "properties": {
+        "critical": {"type": "integer", "minimum": 0},
+        "high": {"type": "integer", "minimum": 0},
+        "medium": {"type": "integer", "minimum": 0},
+        "low": {"type": "integer", "minimum": 0}
+      }
+    },
+    "total": {"type": "integer", "minimum": 0},
+    "score": {
+      "type": "object",
+      "required": ["score", "grade", "categories"],
+      "properties": {
+        "score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "grade": {"enum": ["A", "B", "C", "D", "F"]},
+        "categories": {"type": ["object", "array"]}
+      }
+    },
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["fingerprint", "rule_id", "category", "severity", "confidence", "title", "description", "risk", "recommendation", "metadata"],
+      "properties": {
+        "fingerprint": {"type": "string"},
+        "rule_id": {"type": "string"},
+        "category": {"type": "string"},
+        "severity": {"enum": ["critical", "high", "medium", "low"]},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "risk": {"type": "string"},
+        "recommendation": {"type": "string"},
+        "file": {"type": ["string", "null"]},
+        "line": {"type": ["integer", "null"], "minimum": 1},
+        "metadata": {"type": ["object", "array"]}
+      }
+    }
+  }
+}
