@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The project follows Sem
 
 ## Unreleased
 
+## [0.1.1] - 2026-08-23
+
+### Fixed
+
+- Corrected `guard:rules` formatting for the newest Laravel Pint release.
+- Allowed CI to resolve end-of-life Laravel 10 and 11 fixtures explicitly while retaining strict dependency audits for supported Laravel releases.
+
 ## [0.1.0] - 2026-08-23
 
 ### Added

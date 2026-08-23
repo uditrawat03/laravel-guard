@@ -21,6 +21,8 @@ A clean scan is useful evidence, not proof that an application is secure. Larave
 
 The CI matrix tests supported framework generations independently. See the [backwards-compatibility promise](docs/BACKWARDS-COMPATIBILITY.md).
 
+Laravel 10 and 11 compatibility is retained for existing applications, but those framework lines are upstream end-of-life. New deployments should use a currently supported Laravel release so Composer security blocking remains effective.
+
 ## Installation
 
 Until the package is listed on Packagist, register the GitHub repository once in the consuming application and require the stable `0.1` series:
@@ -32,6 +34,8 @@ php artisan vendor:publish --tag=laravel-guard-config
 php artisan guard:doctor
 php artisan guard:scan
 ```
+
+The `^0.1` constraint installs tagged releases instead of `dev-main` and accepts backwards-compatible `0.1.x` fixes. Confirm the resolved version with `composer show laravel-guard/laravel-guard`.
 
 Use `--dev` for scanning in development and CI. Omit `--dev` when the application uses runtime tenant or upload enforcement in production. Laravel package discovery registers the provider and commands automatically. Application PHP is parsed with `nikic/php-parser`; it is not included or executed by the scanner.
 

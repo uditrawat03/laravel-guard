@@ -13,20 +13,28 @@ jobs:
         include:
           - php: '8.2'
             testbench: '^8.0'
+            eol: true
           - php: '8.2'
             testbench: '^9.0'
+            eol: true
           - php: '8.3'
             testbench: '^9.0'
+            eol: true
           - php: '8.2'
             testbench: '^10.0'
+            eol: false
           - php: '8.3'
             testbench: '^10.0'
+            eol: false
           - php: '8.4'
             testbench: '^10.0'
+            eol: false
           - php: '8.3'
             testbench: '^11.0'
+            eol: false
           - php: '8.4'
             testbench: '^11.0'
+            eol: false
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -34,7 +42,15 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: none
       - run: composer require --dev orchestra/testbench:${{ matrix.testbench }} --no-update
-      - run: composer update --prefer-dist --no-interaction
+      - name: Resolve compatibility dependencies
+        run: composer update --prefer-dist --no-interaction
+        env:
+          # Laravel 10 and 11 remain compatibility targets after upstream EOL.
+          # Advisories remain visible; this flag only permits fixture resolution.
+          COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.eol && '1' || '0' }}
+      - name: Audit supported dependency graph
+        if: ${{ !matrix.eol }}
+        run: composer audit --locked
       - run: vendor/bin/pint --test
       - run: composer test
       - run: composer validate --strict

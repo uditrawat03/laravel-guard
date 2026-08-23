@@ -20,6 +20,6 @@ final class ListRulesCommand extends Command
             $this->table(['Rule', 'Module', 'Severity', 'Name'], $rows);
         }
 
-return self::SUCCESS;
+        return self::SUCCESS;
     }
 }
