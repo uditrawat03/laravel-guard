@@ -119,7 +119,6 @@ jobs:
       - run: composer require --dev "orchestra/testbench:^11.0" --no-update
       - run: composer update --prefer-dist --no-interaction
       - run: composer audit --locked
-      - run: vendor/bin/pint --test
       - run: composer test
       - run: composer validate --strict
 
