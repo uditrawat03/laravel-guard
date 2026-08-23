@@ -100,7 +100,9 @@ jobs:
       - name: Audit supported dependency graph
         if: ${{ !matrix.eol }}
         run: composer audit --locked
-      - run: vendor/bin/pint --test
+      - name: Check formatting with the current toolchain
+        if: ${{ matrix.dependencies == 'highest' }}
+        run: vendor/bin/pint --test
       - run: composer test
       - run: composer validate --strict
 
@@ -113,7 +115,8 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-      - run: composer require --dev orchestra/testbench:^11.0 --no-update
+          extensions: fileinfo
+      - run: composer require --dev "orchestra/testbench:^11.0" --no-update
       - run: composer update --prefer-dist --no-interaction
       - run: composer audit --locked
       - run: vendor/bin/pint --test
@@ -153,7 +156,7 @@ jobs:
             echo "::error::Composer unexpectedly accepted an unsupported platform combination."
             exit 1
           fi
-          if ! grep -qi "requires php" composer-error.log; then
+          if ! grep -Eqi "requires? php" composer-error.log; then
             echo "::error::Composer failed without a clear PHP compatibility message."
             exit 1
           fi
