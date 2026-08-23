@@ -20,5 +20,9 @@ final class OutputSchema
 
     public const JUNIT_VERSION = 1;
 
+    public const PERFORMANCE = 'laravel-guard/performance';
+
+    public const PERFORMANCE_VERSION = 1;
+
     private function __construct() {}
 }

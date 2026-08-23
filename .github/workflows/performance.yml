@@ -1,0 +1,30 @@
+name: Performance Budget
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Laravel 13 / PHP 8.3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: composer require --dev "orchestra/testbench:^11.0" --no-update
+      - run: composer update --prefer-dist --no-interaction
+      - run: mkdir -p build
+      - name: Enforce warm scan and memory budgets
+        run: |
+          set -o pipefail
+          vendor/bin/testbench guard:benchmark --runs=10 --format=json --max-p95-ms=500 --max-memory-mb=128 | tee build/performance.json
+      - uses: actions/upload-artifact@v6
+        if: ${{ always() }}
+        with:
+          name: performance-report
+          path: build/performance.json
+          if-no-files-found: error

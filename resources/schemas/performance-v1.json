@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:laravel-guard:schema:performance:1",
+  "title": "Laravel Guard performance report v1",
+  "type": "object",
+  "required": ["schema", "schema_version", "runs", "findings", "cold_ms", "warm_average_ms", "warm_p95_ms", "peak_memory_mb", "status", "violations"],
+  "properties": {
+    "schema": {"const": "laravel-guard/performance"},
+    "schema_version": {"const": 1},
+    "runs": {"type": "integer", "minimum": 1, "maximum": 100},
+    "findings": {"type": "integer", "minimum": 0},
+    "cold_ms": {"type": "number", "minimum": 0},
+    "warm_average_ms": {"type": "number", "minimum": 0},
+    "warm_p95_ms": {"type": "number", "minimum": 0},
+    "peak_memory_mb": {"type": "number", "minimum": 0},
+    "status": {"enum": ["pass", "fail"]},
+    "violations": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
