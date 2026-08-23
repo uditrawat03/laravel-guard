@@ -1,6 +1,11 @@
 parameters:
     laravelGuard:
         tenantModels: []
+parametersSchema:
+    laravelGuard: structure([
+        tenantModels: listOf(string())
+    ])
+
 
 services:
     -

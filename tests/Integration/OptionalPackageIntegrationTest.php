@@ -2,6 +2,7 @@
 
 namespace LaravelGuard\Tests\Integration;
 
+use DebugBar\DataCollector\MessagesCollector;
 use LaravelGuard\Core\Findings\FindingCollection;
 use LaravelGuard\Integrations\Debugbar\DebugbarIntegration;
 use LaravelGuard\Integrations\Events\SecurityScanCompleted;
@@ -23,7 +24,7 @@ final class OptionalPackageIntegrationTest extends TestCase
         $this->assertTrue($integration->available());
         $this->assertSame(
             ['permission', 'role', 'role_or_permission'],
-            $integration->middleware(),
+            $integration->authorizationMiddleware(),
         );
     }
 
@@ -50,6 +51,9 @@ final class OptionalPackageIntegrationTest extends TestCase
         $provider = $this->debugbarProvider();
         $this->app->register($provider);
         $debugbar = $this->app->make('debugbar');
+        if (! $debugbar->hasCollector('messages')) {
+            $debugbar->addCollector(new MessagesCollector);
+        }
         $integration = new DebugbarIntegration($this->app);
 
         $this->assertTrue($integration->available());
@@ -58,10 +62,11 @@ final class OptionalPackageIntegrationTest extends TestCase
         $collector = method_exists($debugbar, 'getMessagesCollector')
             ? $debugbar->getMessagesCollector()
             : $debugbar->getCollector('messages');
-        $messages = json_encode($collector->collect(), JSON_THROW_ON_ERROR);
+        $messages = $collector->collect();
+        $lastMessage = $messages['messages'][array_key_last($messages['messages'])];
 
-        $this->assertStringContainsString('laravel-guard', $messages);
-        $this->assertStringContainsString('"score":100', $messages);
+        $this->assertSame(1, $messages['count']);
+        $this->assertSame('laravel-guard', $lastMessage['label']);
     }
 
     public function test_spatie_resolver_tracks_tenant_transitions_and_clears_between_jobs(): void
@@ -74,14 +79,14 @@ final class OptionalPackageIntegrationTest extends TestCase
         $this->assertNull($resolver->currentTenantId());
 
         $first = new Tenant;
-        $first->setAttribute($first->getKeyName(), 'tenant-a');
+        $first->setAttribute($first->getKeyName(), 101);
         $this->app->instance($key, $first);
-        $this->assertSame('tenant-a', $resolver->currentTenantId());
+        $this->assertSame(101, $resolver->currentTenantId());
 
         $second = new Tenant;
-        $second->setAttribute($second->getKeyName(), 'tenant-b');
+        $second->setAttribute($second->getKeyName(), 202);
         $this->app->instance($key, $second);
-        $this->assertSame('tenant-b', $resolver->currentTenantId());
+        $this->assertSame(202, $resolver->currentTenantId());
 
         $this->app->offsetUnset($key);
         $this->assertNull($resolver->currentTenantId());
