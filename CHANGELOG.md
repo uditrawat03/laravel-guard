@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The project follows Sem
 
 ## Unreleased
 
+### Added
+
+- Lowest- and highest-dependency compatibility jobs for Laravel 10-13.
+- Windows CI with real Git baseline and changed-line integration coverage.
+- Negative Composer checks for unsupported PHP and Laravel combinations.
+
 ## [0.1.1] - 2026-08-23
 
 ### Fixed

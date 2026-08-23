@@ -6,34 +6,83 @@ on:
 
 jobs:
   compatibility:
+    name: Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }} / ${{ matrix.dependencies }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - php: '8.2'
+          - laravel: '10'
+            php: '8.2'
             testbench: '^8.0'
+            dependencies: highest
+            composer_args: ''
             eol: true
-          - php: '8.2'
+          - laravel: '11'
+            php: '8.2'
             testbench: '^9.0'
+            dependencies: highest
+            composer_args: ''
             eol: true
-          - php: '8.3'
+          - laravel: '11'
+            php: '8.3'
             testbench: '^9.0'
+            dependencies: highest
+            composer_args: ''
             eol: true
-          - php: '8.2'
+          - laravel: '12'
+            php: '8.2'
             testbench: '^10.0'
+            dependencies: highest
+            composer_args: ''
             eol: false
-          - php: '8.3'
+          - laravel: '12'
+            php: '8.3'
             testbench: '^10.0'
+            dependencies: highest
+            composer_args: ''
             eol: false
-          - php: '8.4'
+          - laravel: '12'
+            php: '8.4'
             testbench: '^10.0'
+            dependencies: highest
+            composer_args: ''
             eol: false
-          - php: '8.3'
+          - laravel: '13'
+            php: '8.3'
             testbench: '^11.0'
+            dependencies: highest
+            composer_args: ''
             eol: false
-          - php: '8.4'
+          - laravel: '13'
+            php: '8.4'
             testbench: '^11.0'
+            dependencies: highest
+            composer_args: ''
+            eol: false
+          - laravel: '10'
+            php: '8.2'
+            testbench: '^8.0'
+            dependencies: lowest
+            composer_args: '--prefer-lowest'
+            eol: true
+          - laravel: '11'
+            php: '8.2'
+            testbench: '^9.0'
+            dependencies: lowest
+            composer_args: '--prefer-lowest'
+            eol: true
+          - laravel: '12'
+            php: '8.2'
+            testbench: '^10.0'
+            dependencies: lowest
+            composer_args: '--prefer-lowest'
+            eol: false
+          - laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            dependencies: lowest
+            composer_args: '--prefer-lowest'
             eol: false
     steps:
       - uses: actions/checkout@v7
@@ -43,7 +92,7 @@ jobs:
           coverage: none
       - run: composer require --dev orchestra/testbench:${{ matrix.testbench }} --no-update
       - name: Resolve compatibility dependencies
-        run: composer update --prefer-dist --no-interaction
+        run: composer update --prefer-dist --no-interaction ${{ matrix.composer_args }}
         env:
           # Laravel 10 and 11 remain compatibility targets after upstream EOL.
           # Advisories remain visible; this flag only permits fixture resolution.
@@ -54,3 +103,57 @@ jobs:
       - run: vendor/bin/pint --test
       - run: composer test
       - run: composer validate --strict
+
+  windows:
+    name: Laravel 13 / PHP 8.3 / Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: composer require --dev orchestra/testbench:^11.0 --no-update
+      - run: composer update --prefer-dist --no-interaction
+      - run: composer audit --locked
+      - run: vendor/bin/pint --test
+      - run: composer test
+      - run: composer validate --strict
+
+  unsupported:
+    name: Reject ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case: PHP 8.1 package install
+            php: '8.1'
+            testbench: '^8.0'
+            allow_insecure: '1'
+          - case: Laravel 13 on PHP 8.2
+            php: '8.2'
+            testbench: '^11.0'
+            allow_insecure: '0'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - run: composer require --dev orchestra/testbench:${{ matrix.testbench }} --no-update --ignore-platform-reqs
+      - name: Require Composer to reject the unsupported combination
+        env:
+          COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.allow_insecure }}
+        run: |
+          set +e
+          composer update --prefer-dist --no-interaction --dry-run 2>&1 | tee composer-error.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -eq 0 ]; then
+            echo "::error::Composer unexpectedly accepted an unsupported platform combination."
+            exit 1
+          fi
+          if ! grep -qi "requires php" composer-error.log; then
+            echo "::error::Composer failed without a clear PHP compatibility message."
+            exit 1
+          fi
