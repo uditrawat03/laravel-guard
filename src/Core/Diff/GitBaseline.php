@@ -10,8 +10,15 @@ final class GitBaseline
             throw new \InvalidArgumentException('The Git base contains unsupported characters.');
         }
         $root = rtrim(str_replace('\\', '/', realpath($workingDirectory) ?: $workingDirectory), '/');
-        $path = str_replace('\\', '/', $baselinePath);
-        if (! str_starts_with($path, $root.'/')) {
+        $parent = realpath(dirname($baselinePath));
+        $path = $parent === false
+            ? str_replace('\\', '/', $baselinePath)
+            : rtrim(str_replace('\\', '/', $parent), '/').'/'.basename($baselinePath);
+        $prefix = $root.'/';
+        $insideWorkingDirectory = PHP_OS_FAMILY === 'Windows'
+            ? strncasecmp($path, $prefix, strlen($prefix)) === 0
+            : str_starts_with($path, $prefix);
+        if (! $insideWorkingDirectory) {
             throw new \InvalidArgumentException('The baseline must be inside the Git working directory.');
         }
         $relative = substr($path, strlen($root) + 1);

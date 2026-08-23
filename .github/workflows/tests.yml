@@ -99,7 +99,7 @@ jobs:
           COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.eol && '1' || '0' }}
       - name: Audit supported dependency graph
         if: ${{ !matrix.eol }}
-        run: composer audit --locked
+        run: composer audit --locked || (sleep 5 && composer audit --locked)
       - name: Check formatting with the current toolchain
         if: ${{ matrix.dependencies == 'highest' }}
         run: vendor/bin/pint --test
