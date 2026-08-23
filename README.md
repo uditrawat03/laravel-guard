@@ -162,6 +162,8 @@ Future upstream majors are treated as unverified until added to this matrix. See
 
 Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, `assertRouteUsesMiddleware()`, and `assertTenantSafe()`.
 
+Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. Mutation testing remains a separate pre-v1 hardening item.
+
 ```yaml
 - name: Laravel Guard configuration
   run: php artisan guard:doctor --strict

@@ -21,7 +21,7 @@ jobs:
       - name: Run coverage suite
         run: vendor/bin/phpunit --coverage-clover=build/coverage.xml --coverage-text
       - name: Enforce coverage budget
-        run: php .github/scripts/verify-coverage.php build/coverage.xml 60
+        run: php .github/scripts/verify-coverage.php build/coverage.xml 75
       - uses: actions/upload-artifact@v6
         if: ${{ always() }}
         with:
