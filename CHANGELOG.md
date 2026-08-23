@@ -11,6 +11,7 @@ All notable changes to this project are documented here. The project follows Sem
 - Corrected `guard:rules` formatting for the newest Laravel Pint release.
 - Allowed CI to resolve end-of-life Laravel 10 and 11 fixtures explicitly while retaining strict dependency audits for supported Laravel releases.
 - Ignored Laravel 12's framework-owned signed local-storage route by default and added configurable route-name/URI exclusions.
+- Updated GitHub release and provenance actions to their current supported major versions.
 
 ## [0.1.0] - 2026-08-23
 
