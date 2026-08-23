@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The project follows Sem
 
 ## Unreleased
 
+## [0.1.0] - 2026-08-23
+
 ### Added
 
 - Laravel-native configuration, route, query, model, secret, API, upload, and tenant analysis.

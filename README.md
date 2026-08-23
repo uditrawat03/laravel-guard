@@ -23,14 +23,17 @@ The CI matrix tests supported framework generations independently. See the [back
 
 ## Installation
 
+Until the package is listed on Packagist, register the GitHub repository once in the consuming application and require the stable `0.1` series:
+
 ```bash
-composer require --dev laravel-guard/laravel-guard
+composer config repositories.laravel-guard vcs https://github.com/uditrawat03/laravel-guard.git
+composer require --dev laravel-guard/laravel-guard:^0.1
 php artisan vendor:publish --tag=laravel-guard-config
 php artisan guard:doctor
 php artisan guard:scan
 ```
 
-Laravel package discovery registers the provider and commands automatically. Application PHP is parsed with `nikic/php-parser`; it is not included or executed by the scanner.
+Use `--dev` for scanning in development and CI. Omit `--dev` when the application uses runtime tenant or upload enforcement in production. Laravel package discovery registers the provider and commands automatically. Application PHP is parsed with `nikic/php-parser`; it is not included or executed by the scanner.
 
 ## Commands
 

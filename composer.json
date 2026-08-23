@@ -2,6 +2,11 @@
     "name": "laravel-guard/laravel-guard",
     "description": "Laravel-native security and multi-tenancy analysis for development and CI.",
     "keywords": ["laravel", "security", "multi-tenancy", "static-analysis", "ci"],
+    "homepage": "https://github.com/uditrawat03/laravel-guard",
+    "support": {
+        "issues": "https://github.com/uditrawat03/laravel-guard/issues",
+        "source": "https://github.com/uditrawat03/laravel-guard"
+    },
     "license": "MIT",
     "type": "library",
     "require": {
@@ -41,6 +46,19 @@
     "scripts": {
         "test": "phpunit",
         "format": "pint"
+    },
+    "archive": {
+        "exclude": [
+            "/hospital-demo",
+            "/vendor",
+            "/.github",
+            "/composer.lock",
+            "/.phpunit.result.cache",
+            "/tests",
+            "/phpunit.xml",
+            "/infection.json5",
+            "/laravel-guard-implementation-blueprint.md"
+        ]
     },
     "config": {"sort-packages": true, "allow-plugins": {"php-http/discovery": true}},
     "minimum-stability": "stable",
