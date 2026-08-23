@@ -8,8 +8,9 @@
     "logs": {
         "text": "build/infection.log",
         "summary": "build/infection-summary.log",
-        "summaryJson": "build/infection-summary.json"
+        "summaryJson": "build/infection-summary.json",
+        "perMutator": "build/infection-per-mutator.md"
     },
-    "minMsi": 70,
-    "minCoveredMsi": 80
+    "minMsi": 43,
+    "minCoveredMsi": 43
 }

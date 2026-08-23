@@ -31,3 +31,4 @@ jobs:
             build/infection-summary.log
             build/infection-summary.json
           if-no-files-found: warn
+            build/infection-per-mutator.md
