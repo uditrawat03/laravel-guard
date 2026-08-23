@@ -8,7 +8,7 @@ A clean scan is useful evidence, not proof that an application is secure. Larave
 
 - **Catch framework-specific risks early.** Detect missing route authorization, unsafe raw queries, weak upload validation, exposed secrets, insecure production configuration, and tenant isolation gaps in one scan.
 - **Protect multi-tenant data twice.** Static rules flag suspicious access patterns while the optional Eloquent trait scopes queries, assigns tenant keys, and blocks cross-tenant hydration at runtime.
-- **Give developers actionable findings.** Stable rule IDs, severity, confidence, source locations, remediation guidance, and documentation links make results suitable for code review rather than producing an unexplained pass/fail signal.
+- **Give developers actionable findings.** Stable rule IDs, severity, confidence, source locations, risk, remediation guidance, and analysis limitations make results suitable for code review.
 - **Adopt without stopping delivery.** Baselines suppress known debt by fingerprint, while `guard:diff` reports both introduced and resolved findings so CI can focus on the current change.
 - **Use the same evidence everywhere.** Console output helps locally; SARIF, GitHub annotations, JUnit, JSON, HTML, and logs fit existing CI and audit workflows.
 - **Keep sensitive data private.** Secret findings report locations and metadata without copying secret values. Upload inspection records hashes and MIME metadata, never file contents.
@@ -26,6 +26,7 @@ The CI matrix tests supported framework generations independently. See the [back
 ```bash
 composer require --dev laravel-guard/laravel-guard
 php artisan vendor:publish --tag=laravel-guard-config
+php artisan guard:doctor
 php artisan guard:scan
 ```
 
@@ -41,8 +42,15 @@ php artisan guard:check --fail-on=high
 php artisan guard:diff main --fail-on=high
 php artisan guard:baseline
 php artisan guard:rules
+php artisan guard:explain LG-TENANT-002
+php artisan guard:doctor
+php artisan guard:doctor --strict --format=json
 php artisan guard:benchmark --runs=10
 ```
+
+`guard:doctor` validates scan paths, severities, modules, tenant configuration, custom rules, reporters, optional integrations, runtime MIME support, baseline storage, and runtime environment controls. Errors return a failing exit code; `--strict` also fails for warnings.
+
+`guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor.
 
 `guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt.
 
@@ -56,7 +64,7 @@ php artisan guard:benchmark --runs=10
 - Hardcoded and Git-tracked credentials, with secret values excluded from findings
 - API authentication, throttling, and unsafe resource exposure
 
-Run `php artisan guard:rules` for the installed rule catalog. Configure modules, paths, thresholds, suppressions, policy models, and adapters in `config/laravel-guard.php`.
+Run `php artisan guard:rules` for the installed catalog and see the [rule reference](docs/RULES.md). Configure modules, paths, thresholds, suppressions, policy models, and adapters in `config/laravel-guard.php`.
 
 ## Tenant Protection
 
@@ -112,18 +120,20 @@ The optional [PHPStan extension](docs/PHPSTAN.md) verifies that configured tenan
 
 ## Testing And CI
 
-Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, and `assertTenantSafe()`.
+Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, `assertRouteUsesMiddleware()`, and `assertTenantSafe()`.
 
 ```yaml
-- name: Laravel Guard
+- name: Laravel Guard configuration
+  run: php artisan guard:doctor --strict
+- name: Laravel Guard scan
   run: php artisan guard:check --fail-on=high --format=github
 ```
 
-The package includes focused regression, adversarial upload, and property-style test cases. See [performance guidance](docs/PERFORMANCE.md), [implementation status](docs/ROADMAP.md), [security policy](SECURITY.md), and [contributing guide](CONTRIBUTING.md).
+The package includes focused regression, adversarial upload, and property-style test cases. See [performance guidance](docs/PERFORMANCE.md), [implementation status](docs/ROADMAP.md), [pending features](docs/PENDING_FEATURES.md), [security policy](SECURITY.md), and [contributing guide](CONTRIBUTING.md).
 
 ## Extending Laravel Guard
 
-Implement `LaravelGuard\Core\Contracts\GuardRule` and list the class under `custom_rules`. Custom reporters implement `LaravelGuard\Core\Contracts\SecurityReporter` and are mapped by format name under `reporters`.
+Implement `LaravelGuard\Core\Contracts\GuardRule` and list the class under `custom_rules`. Custom reporters implement `LaravelGuard\Core\Contracts\SecurityReporter` and are mapped by format name under `reporters`. Invalid custom rules are retained as Doctor diagnostics and prevent scans from running until corrected.
 
 ## License
 

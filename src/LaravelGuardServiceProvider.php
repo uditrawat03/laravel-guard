@@ -8,9 +8,14 @@ use LaravelGuard\Commands\BaselineCommand;
 use LaravelGuard\Commands\BenchmarkCommand;
 use LaravelGuard\Commands\CheckCommand;
 use LaravelGuard\Commands\DiffCommand;
+use LaravelGuard\Commands\DoctorCommand;
+use LaravelGuard\Commands\ExplainRuleCommand;
 use LaravelGuard\Commands\ListRulesCommand;
 use LaravelGuard\Commands\ScanCommand;
 use LaravelGuard\Core\Contracts\SecurityContext;
+use LaravelGuard\Core\Diagnostics\ConfigurationIssueBag;
+use LaravelGuard\Core\Diagnostics\DiagnosticResult;
+use LaravelGuard\Core\Diagnostics\DiagnosticStatus;
 use LaravelGuard\Core\Exceptions\SecurityExceptionManager;
 use LaravelGuard\Core\Rules\RuleRegistry;
 use LaravelGuard\Core\Source\SourceIndex;
@@ -52,6 +57,7 @@ final class LaravelGuardServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/laravel-guard.php', 'laravel-guard');
         $this->app->singleton(RuleRegistry::class);
         $this->app->singleton(SourceIndex::class);
+        $this->app->singleton(ConfigurationIssueBag::class);
         $this->app->scoped(SecurityEventCollector::class);
         $this->app->singleton(SecurityExceptionManager::class);
         $this->app->singleton(SecurityContext::class, fn ($app) => new SecurityContext($app, $app['config']->get('laravel-guard', [])));
@@ -63,12 +69,25 @@ final class LaravelGuardServiceProvider extends ServiceProvider
         $this->app->singleton(LaravelGuard::class);
     }
 
-    public function boot(RuleRegistry $registry): void
+    public function boot(RuleRegistry $registry, ConfigurationIssueBag $issues): void
     {
         $this->publishes([__DIR__.'/../config/laravel-guard.php' => config_path('laravel-guard.php')], 'laravel-guard-config');
         $this->app['router']->aliasMiddleware('guard.uploads', InspectUploadedFiles::class);
-        foreach ([...self::RULES, ...config('laravel-guard.custom_rules', [])] as $rule) {
+        foreach (self::RULES as $rule) {
             $registry->register($rule);
+        }
+        foreach ((array) config('laravel-guard.custom_rules', []) as $rule) {
+            try {
+                $registry->register($rule);
+            } catch (\Throwable $error) {
+                $label = is_scalar($rule) ? (string) $rule : get_debug_type($rule);
+                $issues->add(new DiagnosticResult(
+                    DiagnosticStatus::Error,
+                    'custom_rules',
+                    "Custom rule [{$label}] could not be registered: {$error->getMessage()}",
+                    'Register a resolvable class implementing LaravelGuard\\Core\\Contracts\\GuardRule.',
+                ));
+            }
         }
         if ($this->runtimeEnabled()) {
             $this->app['db']->listen(function (QueryExecuted $query): void {
@@ -76,7 +95,10 @@ final class LaravelGuardServiceProvider extends ServiceProvider
             });
         }
         if ($this->app->runningInConsole()) {
-            $this->commands([ScanCommand::class, CheckCommand::class, DiffCommand::class, BaselineCommand::class, ListRulesCommand::class, BenchmarkCommand::class]);
+            $this->commands([
+                ScanCommand::class, CheckCommand::class, DiffCommand::class, BaselineCommand::class,
+                ListRulesCommand::class, BenchmarkCommand::class, DoctorCommand::class, ExplainRuleCommand::class,
+            ]);
         }
     }
 

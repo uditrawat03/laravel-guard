@@ -12,3 +12,9 @@ All notable changes to this project are documented here. The project follows Sem
 - Baselines and Git-aware introduced/resolved security diffs.
 - Optional Telescope, Debugbar, Spatie Permission, tenancy, and PHPStan integrations.
 - CI compatibility and provenance-attested release workflows.
+- `guard:doctor` configuration and optional-integration diagnostics with strict CI and JSON modes.
+- `guard:explain` rule guidance and a stable built-in rule reference.
+
+### Changed
+
+- Invalid configured custom rules are reported by Doctor and prevent incomplete scans from running.
