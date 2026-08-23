@@ -16,6 +16,7 @@ All notable changes to this project are documented here. The project follows Sem
 - Enforceable `guard:benchmark` warm-P95 and peak-memory ceilings with cold/warm metrics, failing CI exit codes, and JSON output.
 - A packaged performance-report v1 JSON Schema and public Laravel 13 performance workflow with downloadable results.
 - A PCOV/Clover coverage workflow with a standalone verifier, downloadable report, GitHub summary, and enforced 75% statement threshold.
+- A scheduled and manually dispatchable full-catalog Infection workflow with an enforced 43% MSI/covered-MSI floor and downloadable survivor reports.
 
 ### Fixed
 

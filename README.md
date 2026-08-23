@@ -162,7 +162,7 @@ Future upstream majors are treated as unverified until added to this matrix. See
 
 Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, `assertRouteUsesMiddleware()`, and `assertTenantSafe()`.
 
-Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. Mutation testing remains a separate pre-v1 hardening item.
+Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. A weekly and manually dispatchable Infection 0.35 workflow mutation-tests the full `src` catalog, publishes survivor reports, and rejects MSI or covered MSI below the current 43% non-regression floor. The baseline measured 43.19% (951 killed, 1 errored, and 1,252 escaped of 2,204 mutations); raising it toward 70% MSI and 80% covered MSI remains pre-v1 hardening work.
 
 ```yaml
 - name: Laravel Guard configuration
@@ -171,7 +171,7 @@ Public CI runs the complete suite with PCOV, retains the Clover report, and reje
   run: php artisan guard:check --fail-on=high --format=github
 ```
 
-The package includes focused regression, adversarial upload, and property-style test cases. See [performance guidance](docs/PERFORMANCE.md), [implementation status](docs/ROADMAP.md), [pending features](docs/PENDING_FEATURES.md), [security policy](SECURITY.md), and [contributing guide](CONTRIBUTING.md).
+The package includes focused regression, adversarial upload, and property-style test cases. See [mutation-testing guidance](docs/MUTATION_TESTING.md), [performance guidance](docs/PERFORMANCE.md), [implementation status](docs/ROADMAP.md), [pending features](docs/PENDING_FEATURES.md), [security policy](SECURITY.md), and [contributing guide](CONTRIBUTING.md).
 
 ## Extending Laravel Guard
 
