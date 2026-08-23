@@ -11,6 +11,14 @@ All notable changes to this project are documented here. The project follows Sem
 - Negative Composer checks for unsupported PHP and Laravel combinations.
 - Scheduled and manually dispatchable Packagist installation, rollback, and roll-forward verification.
 - A release runbook covering distribution checks, immutable rollback response, and security hotfix handling.
+- Dedicated upstream integration jobs for Spatie Permission 6-8, Spatie Multitenancy 3-4, stancl/tenancy 3, Telescope 5, Debugbar 3-4, and PHPStan 1-2.
+- Real tenant transition, cleared-context, event dispatch, Debugbar collector, middleware alias, and passing/failing PHPStan fixtures.
+
+### Fixed
+
+- Added Debugbar 4's `Fruitcake` namespace while retaining Debugbar 3 compatibility.
+- Registered the PHPStan extension parameter schema and moved tenant-model analysis to PHPStan's public class node so configured unsafe models are reported.
+
 
 ## [0.1.1] - 2026-08-23
 

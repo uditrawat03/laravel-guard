@@ -142,6 +142,19 @@ Set `integrations.telescope` or `integrations.debugbar` to `true` to publish a m
 
 The optional [PHPStan extension](docs/PHPSTAN.md) verifies that configured tenant model classes implement `TenantOwned` or use `GuardsTenant`.
 
+Optional adapters keep these dependencies out of the core package. Their supported upstream majors are installed and exercised in dedicated public CI jobs:
+
+| Integration | Verified majors | What Laravel Guard verifies |
+|---|---|---|
+| Spatie Permission | 6, 7, 8 | Authorization middleware aliases are recognized. |
+| Spatie Multitenancy | 3, 4 | Current tenant transitions and cleared job context are resolved. |
+| stancl/tenancy | 3 | Current tenant transitions and no-tenant context are resolved. |
+| Laravel Telescope | 5 | Scan totals, severity counts, and score are dispatched through Laravel events. |
+| Laravel Debugbar | 3, 4 | Metadata-only summaries reach the messages collector across both package namespaces. |
+| PHPStan | 1.x, 2.x | Protected fixtures pass and configured unprotected tenant models fail with a stable identifier. |
+
+Future upstream majors are treated as unverified until added to this matrix. See the public [Optional Integrations workflow](https://github.com/uditrawat03/laravel-guard/actions/workflows/integrations.yml) for current evidence.
+
 ## Testing And CI
 
 Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, `assertRouteUsesMiddleware()`, and `assertTenantSafe()`.
