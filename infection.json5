@@ -1,7 +1,15 @@
 {
     "$schema": "vendor/infection/infection/resources/schema.json",
     "source": { "directories": ["src"] },
-    "logs": { "text": "build/infection.log" },
+    "threads": "max",
+    "timeout": 15,
+    "timeoutsAsEscaped": true,
+    "maxTimeouts": 0,
+    "logs": {
+        "text": "build/infection.log",
+        "summary": "build/infection-summary.log",
+        "summaryJson": "build/infection-summary.json"
+    },
     "minMsi": 70,
     "minCoveredMsi": 80
 }

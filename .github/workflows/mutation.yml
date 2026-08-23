@@ -1,0 +1,33 @@
+name: Mutation Budget
+
+on:
+  schedule:
+    - cron: '41 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  infection:
+    name: Infection 0.35 / PHP 8.3
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: pcov
+      - run: composer config allow-plugins.infection/extension-installer true
+      - run: composer require --dev "orchestra/testbench:^11.0" "infection/infection:^0.35" --no-update
+      - run: composer update --prefer-dist --no-interaction
+      - run: mkdir -p build
+      - name: Enforce mutation score and timeout budgets
+        run: vendor/bin/infection --show-mutations=0 --log-verbosity=default
+      - uses: actions/upload-artifact@v6
+        if: ${{ always() }}
+        with:
+          name: mutation-report
+          path: |
+            build/infection.log
+            build/infection-summary.log
+            build/infection-summary.json
+          if-no-files-found: warn
