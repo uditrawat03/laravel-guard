@@ -5,12 +5,12 @@ namespace LaravelGuard\Integrations\PHPStan;
 use LaravelGuard\Tenant\Contracts\TenantOwned;
 use LaravelGuard\Tenant\GuardsTenant;
 use PhpParser\Node;
-use PhpParser\Node\Stmt\Class_;
 use PHPStan\Analyser\Scope;
+use PHPStan\Node\InClassNode;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
-/** @implements Rule<Class_> */
+/** @implements Rule<InClassNode> */
 final readonly class TenantModelRule implements Rule
 {
     /** @param list<class-string> $tenantModelClasses */
@@ -18,16 +18,12 @@ final readonly class TenantModelRule implements Rule
 
     public function getNodeType(): string
     {
-        return Class_::class;
+        return InClassNode::class;
     }
 
     public function processNode(Node $node, Scope $scope): array
     {
-        if (! $scope->isInClass()) {
-            return [];
-        }
-
-        $reflection = $scope->getClassReflection();
+        $reflection = $node->getClassReflection();
         if (! in_array($reflection->getName(), $this->tenantModelClasses, true)) {
             return [];
         }
