@@ -55,12 +55,15 @@ php artisan guard:explain LG-TENANT-002
 php artisan guard:doctor
 php artisan guard:doctor --strict --format=json
 php artisan guard:doctor --output=storage/app/guard.sarif
-php artisan guard:benchmark --runs=10
+php artisan guard:benchmark --runs=10 --max-p95-ms=500 --max-memory-mb=128
+php artisan guard:benchmark --runs=10 --format=json
 ```
 
 `guard:doctor` validates scan paths, severities, modules, tenancy, policy models, suppression structure, custom rules, reporters, optional integrations, Git capability, runtime MIME support, baseline governance, runtime environments, and an optional report output destination. Errors return a failing exit code; `--strict` also fails for warnings. See [Configuration diagnostics](docs/DIAGNOSTICS.md) for the full check catalog.
 
 `guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor.
+
+`guard:benchmark` separates the first cold scan from warm average/P95 measurements and records peak memory. Optional duration and memory ceilings return a failing exit code for CI; JSON output follows the packaged `laravel-guard/performance` v1 schema. See [performance budgets](docs/PERFORMANCE.md).
 
 `guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt. Governed baselines record an owner, acceptance reason, and expiration; expired entries automatically stop suppressing findings.
 

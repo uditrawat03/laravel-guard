@@ -13,6 +13,8 @@ All notable changes to this project are documented here. The project follows Sem
 - A release runbook covering distribution checks, immutable rollback response, and security hotfix handling.
 - Dedicated upstream integration jobs for Spatie Permission 6-8, Spatie Multitenancy 3-4, stancl/tenancy 3, Telescope 5, Debugbar 3-4, and PHPStan 1-2.
 - Real tenant transition, cleared-context, event dispatch, Debugbar collector, middleware alias, and passing/failing PHPStan fixtures.
+- Enforceable `guard:benchmark` warm-P95 and peak-memory ceilings with cold/warm metrics, failing CI exit codes, and JSON output.
+- A packaged performance-report v1 JSON Schema and public Laravel 13 performance workflow with downloadable results.
 
 ### Fixed
 
