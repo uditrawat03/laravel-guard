@@ -15,6 +15,7 @@ return [
         'sensitive_methods' => ['POST', 'PUT', 'PATCH', 'DELETE'],
         'sensitive_patterns' => ['admin/*', 'api/admin/*', '*delete*', '*destroy*', '*export*'],
         'public' => [],
+        'ignore' => ['storage.local.*'],
         'authorization_middleware' => ['can', 'permission', 'role', 'role_or_permission'],
         'policy_models' => [],
     ],

@@ -33,7 +33,11 @@ final class UnsignedSensitiveAction extends AbstractGuardRule
 
     public function scan(SecurityContext $context): iterable
     {
+        $config = $context->config['routes'] ?? [];
         foreach ($context->app['router']->getRoutes() as $route) {
+            if (RouteAnalysis::ignored($route, $config)) {
+                continue;
+            }
             $identity = strtolower($route->uri().' '.($route->getName() ?? ''));
             $isLink = array_intersect($route->methods(), ['GET', 'HEAD']) !== [];
             if (! $isLink || ! preg_match('/(verify|unsubscribe|invitation|signed-download|password\/reset)/', $identity)) {

@@ -41,8 +41,23 @@ final class RouteAnalysis
 
     public static function public(Route $r, array $c): bool
     {
+        if (self::ignored($r, $c)) {
+            return true;
+        }
+
         foreach ($c['public'] ?? [] as $p) {
             if (Str::is($p, $r->uri()) || Str::is($p, (string) $r->getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function ignored(Route $r, array $c): bool
+    {
+        foreach ($c['ignore'] ?? [] as $pattern) {
+            if (Str::is($pattern, $r->uri()) || Str::is($pattern, (string) $r->getName())) {
                 return true;
             }
         }

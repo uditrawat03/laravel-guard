@@ -33,7 +33,11 @@ final class SensitiveGetAction extends AbstractGuardRule
 
     public function scan(SecurityContext $context): iterable
     {
+        $config = $context->config['routes'] ?? [];
         foreach ($context->app['router']->getRoutes() as $route) {
+            if (RouteAnalysis::ignored($route, $config)) {
+                continue;
+            }
             $identity = strtolower($route->uri().' '.($route->getName() ?? '').' '.$route->getActionName());
             if (! in_array('GET', $route->methods(), true) || ! preg_match('/\b(delete|destroy|remove|purge|approve|disable|reset)\b/', $identity)) {
                 continue;

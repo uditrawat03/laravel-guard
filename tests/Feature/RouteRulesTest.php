@@ -32,6 +32,14 @@ final class RouteRulesTest extends TestCase
         $this->assertNotContains('LG-ROUTE-002', $ids);
     }
 
+    public function test_configured_framework_route_is_ignored(): void
+    {
+        Route::put('framework/storage/{path}', fn () => null)->name('framework.storage.upload');
+        $this->app['config']->set('laravel-guard.routes.ignore', ['storage.local.*', 'framework.*']);
+
+        $this->assertCount(0, $this->app->make(LaravelGuard::class)->scan('routes'));
+    }
+
     public function test_configured_model_without_policy_is_reported(): void
     {
         $this->app['config']->set('laravel-guard.routes.policy_models', [UnprotectedPolicyModel::class]);
