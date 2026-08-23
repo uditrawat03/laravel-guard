@@ -23,10 +23,11 @@ final readonly class ConfigurationDoctor
         private Repository $config,
         private IntegrationManager $integrations,
         private ConfigurationIssueBag $bootIssues,
+        private OperationalDiagnostics $operational,
     ) {}
 
     /** @return list<DiagnosticResult> */
-    public function diagnose(): array
+    public function diagnose(?string $output = null): array
     {
         return [
             ...$this->bootIssues->all(),
@@ -39,6 +40,7 @@ final readonly class ConfigurationDoctor
             ...$this->uploads(),
             ...$this->baseline(),
             ...$this->runtime(),
+            ...$this->operational->diagnose($output),
         ];
     }
 

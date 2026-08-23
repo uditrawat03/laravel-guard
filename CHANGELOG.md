@@ -16,6 +16,7 @@ All notable changes to this project are documented here. The project follows Sem
 - `guard:explain` rule guidance and a stable built-in rule reference.
 - Governed schema-3 baselines with ownership, acceptance reasons, expiration, listing, explanation, pruning, legacy compatibility, and expired-finding resurfacing.
 - Independently versioned JSON report, security diff, governed baseline, SARIF convention, and JUnit convention contracts with packaged JSON Schema definitions and upgrade guidance.
+- Operational Doctor checks for suppressions, policy models, Git context, and report destinations, plus working fingerprint and route suppression targets.
 
 ### Changed
 

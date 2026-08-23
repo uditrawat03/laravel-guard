@@ -48,10 +48,11 @@ php artisan guard:rules
 php artisan guard:explain LG-TENANT-002
 php artisan guard:doctor
 php artisan guard:doctor --strict --format=json
+php artisan guard:doctor --output=storage/app/guard.sarif
 php artisan guard:benchmark --runs=10
 ```
 
-`guard:doctor` validates scan paths, severities, modules, tenant configuration, custom rules, reporters, optional integrations, runtime MIME support, baseline storage, and runtime environment controls. Errors return a failing exit code; `--strict` also fails for warnings.
+`guard:doctor` validates scan paths, severities, modules, tenancy, policy models, suppression structure, custom rules, reporters, optional integrations, Git capability, runtime MIME support, baseline governance, runtime environments, and an optional report output destination. Errors return a failing exit code; `--strict` also fails for warnings. See [Configuration diagnostics](docs/DIAGNOSTICS.md) for the full check catalog.
 
 `guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor.
 
@@ -116,7 +117,18 @@ use LaravelGuard\Attributes\GuardIgnore;
 final class MonthlyRollup {}
 ```
 
-Configuration suppressions can target a route, file, symbol, or fingerprint. Scoped runtime exceptions use `LaravelGuard::allow($ruleId, $reason, $callback)` and never disable unrelated rules globally.
+Configuration suppressions can target a route, file, symbol, or fingerprint. Include a reason for structured targets:
+
+```php
+'ignore' => [
+    'LG-QUERY-001' => [[
+        'target' => 'App\\Reports\\MonthlyRollup::run',
+        'reason' => 'The query uses a fixed internal expression.',
+    ]],
+],
+```
+
+`guard:doctor --strict` flags unknown rule IDs, global suppression, malformed targets, and missing structured reasons. Scoped runtime exceptions use `LaravelGuard::allow($ruleId, $reason, $callback)` and never disable unrelated rules globally.
 
 ## Optional Integrations
 
