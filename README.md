@@ -40,7 +40,10 @@ php artisan guard:scan --module=routes --severity=high
 php artisan guard:scan --format=sarif --output=guard.sarif
 php artisan guard:check --fail-on=high
 php artisan guard:diff main --fail-on=high
-php artisan guard:baseline
+php artisan guard:baseline --reason="Reviewed security debt" --owner="security-team" --expires="+90 days"
+php artisan guard:baseline --list
+php artisan guard:baseline --explain=LG-UPLOAD-001
+php artisan guard:baseline --prune
 php artisan guard:rules
 php artisan guard:explain LG-TENANT-002
 php artisan guard:doctor
@@ -52,7 +55,9 @@ php artisan guard:benchmark --runs=10
 
 `guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor.
 
-`guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt.
+`guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt. Governed baselines record an owner, acceptance reason, and expiration; expired entries automatically stop suppressing findings.
+
+See [Baseline governance](docs/BASELINES.md) for schema compatibility, maintenance commands, CI behavior, and configuration.
 
 ## Security Coverage
 

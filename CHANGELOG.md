@@ -14,6 +14,7 @@ All notable changes to this project are documented here. The project follows Sem
 - CI compatibility and provenance-attested release workflows.
 - `guard:doctor` configuration and optional-integration diagnostics with strict CI and JSON modes.
 - `guard:explain` rule guidance and a stable built-in rule reference.
+- Governed schema-3 baselines with ownership, acceptance reasons, expiration, listing, explanation, pruning, legacy compatibility, and expired-finding resurfacing.
 
 ### Changed
 

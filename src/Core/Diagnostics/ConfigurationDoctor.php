@@ -5,6 +5,7 @@ namespace LaravelGuard\Core\Diagnostics;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
+use LaravelGuard\Core\Baseline\BaselineDocument;
 use LaravelGuard\Core\Contracts\SecurityReporter;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Integrations\IntegrationManager;
@@ -186,7 +187,40 @@ final readonly class ConfigurationDoctor
             return [$this->error('baseline', "Baseline directory [{$directory}] must exist and be writable.")];
         }
 
-        return [$this->pass('baseline', "Baseline path [{$path}] is writable.")];
+        $results = [$this->pass('baseline', "Baseline path [{$path}] is writable.")];
+        $requireReason = $this->config->get('laravel-guard.baseline_governance.require_reason', true);
+        $ttl = $this->config->get('laravel-guard.baseline_governance.default_ttl_days', 90);
+        if (! is_bool($requireReason)) {
+            $results[] = $this->error('baseline.require_reason', 'Baseline require_reason must be a boolean.');
+        }
+        if (! is_int($ttl) || $ttl < 0) {
+            $results[] = $this->error('baseline.default_ttl_days', 'Baseline default_ttl_days must be a non-negative integer.');
+        }
+        if (! file_exists($path)) {
+            return $results;
+        }
+
+        try {
+            $document = BaselineDocument::fromJson((string) file_get_contents($path));
+        } catch (\Throwable $error) {
+            $results[] = $this->error('baseline.document', "Baseline cannot be parsed: {$error->getMessage()}", 'Regenerate it with guard:baseline --force.');
+
+            return $results;
+        }
+        if ($document->sourceSchema < BaselineDocument::SCHEMA_VERSION && $document->entries !== []) {
+            $results[] = $this->warning('baseline.schema', "Baseline schema {$document->sourceSchema} has no governance metadata.", 'Regenerate it with owner, reason, and expiration options.');
+        }
+        if ($document->expired() !== []) {
+            $results[] = $this->warning('baseline.expired', count($document->expired()).' baseline entry or entries have expired.', 'Run guard:baseline --prune after reviewing the resurfaced findings.');
+        }
+        if ($requireReason === true) {
+            $missing = array_filter($document->entries, fn ($entry) => $entry->reason === null);
+            if ($missing !== []) {
+                $results[] = $this->warning('baseline.reasons', count($missing).' baseline entry or entries have no acceptance reason.');
+            }
+        }
+
+        return $results;
     }
 
     /** @return list<DiagnosticResult> */

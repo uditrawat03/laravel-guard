@@ -30,5 +30,10 @@ return [
     'ignore' => [],
     'custom_rules' => [],
     'baseline' => base_path('.laravel-guard-baseline.json'),
+    'baseline_governance' => [
+        'require_reason' => true,
+        'default_ttl_days' => 90,
+        'owner' => env('LARAVEL_GUARD_BASELINE_OWNER'),
+    ],
     'cache' => ['enabled' => true],
 ];
