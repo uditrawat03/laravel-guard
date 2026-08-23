@@ -1,0 +1,60 @@
+name: Distribution Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Stable version to install and restore
+        required: true
+        default: '0.1.1'
+      rollback_version:
+        description: Previous stable version used by the rollback drill
+        required: true
+        default: '0.1.0'
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: distribution-verification
+  cancel-in-progress: false
+
+env:
+  RELEASE_VERSION: ${{ inputs.release_version || '0.1.1' }}
+  ROLLBACK_VERSION: ${{ inputs.rollback_version || '0.1.0' }}
+
+jobs:
+  packagist-drill:
+    name: Packagist install and rollback drill
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Create a clean Laravel consumer
+        run: composer create-project --prefer-dist --no-interaction "laravel/laravel:^12.0" "$RUNNER_TEMP/laravel-guard-consumer"
+      - name: Install the stable package from Packagist
+        working-directory: ${{ runner.temp }}/laravel-guard-consumer
+        run: |
+          composer require --dev "laravel-guard/laravel-guard:${RELEASE_VERSION}" --prefer-dist --no-interaction
+          php artisan package:discover --ansi
+          php artisan list --raw | grep -q '^guard:doctor'
+          php "$GITHUB_WORKSPACE/.github/scripts/verify-installed-package.php" vendor/composer/installed.json "$RELEASE_VERSION"
+      - name: Rehearse dependency rollback
+        working-directory: ${{ runner.temp }}/laravel-guard-consumer
+        run: |
+          composer require --dev "laravel-guard/laravel-guard:${ROLLBACK_VERSION}" --with-all-dependencies --prefer-dist --no-interaction
+          php artisan package:discover --ansi
+          php "$GITHUB_WORKSPACE/.github/scripts/verify-installed-package.php" vendor/composer/installed.json "$ROLLBACK_VERSION"
+      - name: Rehearse hotfix roll-forward
+        working-directory: ${{ runner.temp }}/laravel-guard-consumer
+        run: |
+          composer require --dev "laravel-guard/laravel-guard:${RELEASE_VERSION}" --with-all-dependencies --prefer-dist --no-interaction
+          php artisan package:discover --ansi
+          php artisan list --raw | grep -q '^guard:doctor'
+          php "$GITHUB_WORKSPACE/.github/scripts/verify-installed-package.php" vendor/composer/installed.json "$RELEASE_VERSION"
+          composer audit --locked

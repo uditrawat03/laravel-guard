@@ -9,6 +9,8 @@ All notable changes to this project are documented here. The project follows Sem
 - Lowest- and highest-dependency compatibility jobs for Laravel 10-13.
 - Windows CI with real Git baseline and changed-line integration coverage.
 - Negative Composer checks for unsupported PHP and Laravel combinations.
+- Scheduled and manually dispatchable Packagist installation, rollback, and roll-forward verification.
+- A release runbook covering distribution checks, immutable rollback response, and security hotfix handling.
 
 ## [0.1.1] - 2026-08-23
 
