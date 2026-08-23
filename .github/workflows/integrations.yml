@@ -1,0 +1,127 @@
+name: Optional Integrations
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  packages:
+    name: ${{ matrix.name }} / Laravel ${{ matrix.laravel }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Spatie Permission 6
+            laravel: '10'
+            php: '8.2'
+            testbench: '^8.0'
+            package: 'spatie/laravel-permission:^6.0'
+            test: test_spatie_permission_exposes_supported_middleware_aliases
+            eol: true
+          - name: Spatie Permission 7
+            laravel: '12'
+            php: '8.3'
+            testbench: '^10.0'
+            package: 'spatie/laravel-permission:^7.0'
+            test: test_spatie_permission_exposes_supported_middleware_aliases
+            eol: false
+          - name: Spatie Permission 8
+            laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            package: 'spatie/laravel-permission:^8.0'
+            test: test_spatie_permission_exposes_supported_middleware_aliases
+            eol: false
+          - name: Spatie Multitenancy 3
+            laravel: '10'
+            php: '8.2'
+            testbench: '^8.0'
+            package: 'spatie/laravel-multitenancy:^3.0'
+            test: test_spatie_resolver_tracks_tenant_transitions_and_clears_between_jobs
+            eol: true
+          - name: Spatie Multitenancy 4
+            laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            package: 'spatie/laravel-multitenancy:^4.0'
+            test: test_spatie_resolver_tracks_tenant_transitions_and_clears_between_jobs
+            eol: false
+          - name: stancl Tenancy 3
+            laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            package: 'stancl/tenancy:^3.10'
+            test: test_stancl_resolver_tracks_tenant_transitions_and_clears_between_jobs
+            eol: false
+          - name: Telescope 5
+            laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            package: 'laravel/telescope:^5.0'
+            test: test_telescope_publishes_a_scan_event_through_laravel_events
+            eol: false
+          - name: Debugbar 3
+            laravel: '10'
+            php: '8.2'
+            testbench: '^8.0'
+            package: 'barryvdh/laravel-debugbar:^3.0'
+            test: test_debugbar_publishes_a_scan_summary_to_the_messages_collector
+            eol: true
+          - name: Debugbar 4
+            laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            package: 'barryvdh/laravel-debugbar:^4.0'
+            test: test_debugbar_publishes_a_scan_summary_to_the_messages_collector
+            eol: false
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - run: composer require --dev "orchestra/testbench:${{ matrix.testbench }}" "${{ matrix.package }}" --no-update
+      - name: Resolve integration dependencies
+        run: composer update --prefer-dist --no-interaction
+        env:
+          COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.eol && '1' || '0' }}
+      - run: vendor/bin/phpunit --filter "${{ matrix.test }}"
+      - name: Audit supported dependency graph
+        if: ${{ !matrix.eol }}
+        run: composer audit --locked
+
+  phpstan:
+    name: PHPStan ${{ matrix.phpstan }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - phpstan: '1.x'
+            constraint: '^1.12'
+          - phpstan: '2.x'
+            constraint: '^2.1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: composer require --dev "orchestra/testbench:^10.0" "phpstan/phpstan:${{ matrix.constraint }}" --no-update
+      - run: composer update --prefer-dist --no-interaction
+      - name: Accept a tenant-protected model
+        run: vendor/bin/phpstan analyse --no-progress --configuration=tests/Integration/PHPStan/passing.neon
+      - name: Reject an unprotected tenant model
+        run: |
+          set +e
+          output=$(vendor/bin/phpstan analyse --no-progress --error-format=json --configuration=tests/Integration/PHPStan/failing.neon)
+          status=$?
+          set -e
+          echo "$output"
+          if [ "$status" -eq 0 ]; then
+            echo "::error::PHPStan unexpectedly accepted an unprotected tenant model."
+            exit 1
+          fi
+          echo "$output" | grep -q 'laravelGuard.tenant.missingConstraint'

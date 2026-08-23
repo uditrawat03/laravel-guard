@@ -18,7 +18,10 @@ final readonly class DebugbarIntegration implements FindingIntegration
 
     public function available(): bool
     {
-        return class_exists('Barryvdh\\Debugbar\\LaravelDebugbar') && $this->app->bound('debugbar');
+        return (
+            class_exists('Barryvdh\\Debugbar\\LaravelDebugbar')
+            || class_exists('Fruitcake\\LaravelDebugbar\\LaravelDebugbar')
+        ) && $this->app->bound('debugbar');
     }
 
     public function publish(FindingCollection $findings): void

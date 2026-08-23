@@ -1,0 +1,10 @@
+includes:
+    - ../../../extension.neon
+
+parameters:
+    level: 0
+    paths:
+        - Fixtures/UnsafeTenantModel.php
+    laravelGuard:
+        tenantModels:
+            - LaravelGuard\Tests\Integration\PHPStan\Fixtures\UnsafeTenantModel
