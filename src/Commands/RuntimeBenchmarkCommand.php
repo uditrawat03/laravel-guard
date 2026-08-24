@@ -6,13 +6,15 @@ use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Request;
 use LaravelGuard\Core\Support\OutputSchema;
 use LaravelGuard\Runtime\SecurityEventCollector;
 use LaravelGuard\Tenant\Contracts\TenantResolver;
 use LaravelGuard\Tenant\TenantContext;
 use LaravelGuard\Tenant\TenantQueryInspector;
-use LaravelGuard\Uploads\Runtime\UploadInspector;
+use LaravelGuard\Uploads\Runtime\InspectUploadedFiles;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Response;
 
 final class RuntimeBenchmarkCommand extends Command
 {
@@ -20,7 +22,7 @@ final class RuntimeBenchmarkCommand extends Command
 
     protected $description = 'Measure Laravel Guard runtime query and upload inspection overhead';
 
-    public function handle(DatabaseManager $database, UploadInspector $uploads): int
+    public function handle(DatabaseManager $database, InspectUploadedFiles $uploads): int
     {
         $scenario = strtolower((string) $this->argument('scenario'));
         if (! in_array($scenario, ['query', 'upload'], true)) {
@@ -107,15 +109,16 @@ final class RuntimeBenchmarkCommand extends Command
             0.0,
             $database->connection(),
         );
+        $listener = static fn (QueryExecuted $event) => $inspector->inspect($event, ['patients'], 'tenant_id');
 
         return [
-            static fn () => $inspector->inspect($query, ['patients'], 'tenant_id'),
+            static fn () => $listener($query),
             static fn () => null,
         ];
     }
 
     /** @return array{Closure(): void, Closure(): void} */
-    private function uploadOperation(UploadInspector $inspector): array
+    private function uploadOperation(InspectUploadedFiles $middleware): array
     {
         $path = tempnam(sys_get_temp_dir(), 'laravel-guard-benchmark-');
         if ($path === false) {
@@ -124,9 +127,12 @@ final class RuntimeBenchmarkCommand extends Command
         $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', true);
         file_put_contents($path, $png ?: '');
         $file = new UploadedFile($path, 'pixel.png', 'image/png', null, true);
+        $request = Request::create('/uploads', 'POST', [], [], ['file' => $file]);
+        $response = new Response('', Response::HTTP_NO_CONTENT);
+        $next = static fn (): Response => $response;
 
         return [
-            static fn () => $inspector->inspect($file),
+            static fn () => $middleware->handle($request, $next),
             static function () use ($path): void {
                 @unlink($path);
             },
