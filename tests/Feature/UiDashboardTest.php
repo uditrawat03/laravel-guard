@@ -48,6 +48,15 @@ final class UiDashboardTest extends TestCase
         $this->assertContains('throttle:120,1', app('router')->getRoutes()->getByName('laravel-guard.ui.overview')->gatherMiddleware());
     }
 
+    public function test_rule_catalog_uses_compact_package_pagination(): void
+    {
+        $this->get('/_guard/rules')
+            ->assertOk()
+            ->assertSee('class="guard-pagination"', false)
+            ->assertSee('active rules')
+            ->assertDontSee('<svg', false);
+    }
+
     public function test_dashboard_fails_closed_when_ability_is_missing(): void
     {
         config()->set('laravel-guard.ui.ability', 'undefinedLaravelGuardAbility');

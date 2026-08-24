@@ -30,6 +30,7 @@ final class DashboardController extends Controller
             'runtime' => $this->dashboard->runtime(),
             'diagnostics' => $this->dashboard->diagnostics(),
             'allowScan' => (bool) $this->config->get('laravel-guard.ui.allow_scan', false),
+            'assetVersion' => substr(sha1_file($this->assetPath()), 0, 12),
         ]);
     }
 
@@ -43,10 +44,15 @@ final class DashboardController extends Controller
 
     public function asset(): Response
     {
-        return response((string) file_get_contents(__DIR__.'/../../../../resources/ui/app.css'), 200, [
+        return response((string) file_get_contents($this->assetPath()), 200, [
             'Content-Type' => 'text/css; charset=UTF-8',
             'Cache-Control' => 'private, max-age=86400',
         ]);
+    }
+
+    private function assetPath(): string
+    {
+        return __DIR__.'/../../../../resources/ui/app.css';
     }
 
     private function filterFindings(array $findings, Request $request): array

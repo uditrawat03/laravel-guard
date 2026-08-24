@@ -9,6 +9,14 @@ All notable changes to this project are documented here. The project follows Sem
 - An opt-in, package-owned security dashboard with findings, scan history, baselines, rule catalog, runtime status, and configuration diagnostics.
 - Fail-closed Gate authorization, a rate-limited browser scan action, redacted reports, private file-backed history, and retention controls.
 
+### Changed
+
+- Refined the dashboard layout, navigation, tables, filters, responsive behavior, and information hierarchy.
+
+### Fixed
+
+- Replaced framework pagination markup with compact package-owned controls and fingerprinted dashboard assets to prevent stale styles after upgrades.
+
 ## [0.1.2] - 2026-08-24
 
 ### Added
