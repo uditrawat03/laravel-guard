@@ -47,5 +47,7 @@ return [
         'storage_path' => storage_path('app/laravel-guard/ui'),
         'retention_days' => 30,
         'per_page' => 25,
+        'read_rate_limit' => 240,
+        'scan_rate_limit' => 3,
     ],
 ];

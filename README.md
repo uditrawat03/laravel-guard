@@ -55,8 +55,12 @@ The dashboard is disabled by default and fails closed unless the configured Gate
     'storage_path' => storage_path('app/laravel-guard/ui'),
     'retention_days' => 30,
     'per_page' => 25,
+    'read_rate_limit' => 240,
+    'scan_rate_limit' => 3,
 ],
 ```
+
+Dashboard requests and scan submissions use separate per-user (or per-IP for guests) rate-limit buckets. Browsing the interface therefore never consumes the scan allowance. Adjust `read_rate_limit` and `scan_rate_limit` to set their independent per-minute limits.
 
 Define the ability in the consuming application's authorization provider:
 

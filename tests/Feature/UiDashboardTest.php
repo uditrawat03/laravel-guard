@@ -24,6 +24,8 @@ final class UiDashboardTest extends TestCase
             'storage_path' => $this->scanDirectory,
             'retention_days' => 30,
             'per_page' => 10,
+            'read_rate_limit' => 120,
+            'scan_rate_limit' => 3,
         ]);
     }
 
@@ -45,7 +47,17 @@ final class UiDashboardTest extends TestCase
     {
         $this->get('/_guard')->assertOk()->assertSee('Laravel Guard')->assertSee('No scan evidence yet');
         $this->get('/_guard/assets/app.css')->assertOk()->assertHeader('Content-Type', 'text/css; charset=UTF-8');
-        $this->assertContains('throttle:120,1', app('router')->getRoutes()->getByName('laravel-guard.ui.overview')->gatherMiddleware());
+        $this->assertContains('throttle:laravel-guard-ui', app('router')->getRoutes()->getByName('laravel-guard.ui.overview')->gatherMiddleware());
+        $this->assertContains('throttle:laravel-guard-ui-scan', app('router')->getRoutes()->getByName('laravel-guard.ui.scan')->gatherMiddleware());
+    }
+
+    public function test_browsing_dashboard_does_not_consume_scan_rate_limit(): void
+    {
+        foreach (range(1, 4) as $visit) {
+            $this->get('/_guard/rules?page='.$visit)->assertOk();
+        }
+
+        $this->post('/_guard/scans')->assertRedirect('/_guard/overview');
     }
 
     public function test_rule_catalog_uses_compact_package_pagination(): void

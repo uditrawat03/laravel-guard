@@ -2,7 +2,10 @@
 
 namespace LaravelGuard;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use LaravelGuard\Commands\BaselineCommand;
 use LaravelGuard\Commands\BenchmarkCommand;
@@ -81,6 +84,7 @@ final class LaravelGuardServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('laravel-guard.ui.authorize', AuthorizeDashboard::class);
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-guard');
         if ((bool) config('laravel-guard.ui.enabled', false)) {
+            $this->configureUiRateLimiting();
             $this->loadRoutesFrom(__DIR__.'/../routes/ui.php');
         }
         foreach (self::RULES as $rule) {
@@ -110,6 +114,28 @@ final class LaravelGuardServiceProvider extends ServiceProvider
                 ListRulesCommand::class, BenchmarkCommand::class, RuntimeBenchmarkCommand::class, DoctorCommand::class, ExplainRuleCommand::class,
             ]);
         }
+    }
+
+    private function configureUiRateLimiting(): void
+    {
+        RateLimiter::for('laravel-guard-ui', function (Request $request): Limit {
+            return Limit::perMinute(max(1, (int) config('laravel-guard.ui.read_rate_limit', 240)))
+                ->by('laravel-guard-ui:'.$this->rateLimitIdentity($request));
+        });
+
+        RateLimiter::for('laravel-guard-ui-scan', function (Request $request): Limit {
+            return Limit::perMinute(max(1, (int) config('laravel-guard.ui.scan_rate_limit', 3)))
+                ->by('laravel-guard-ui-scan:'.$this->rateLimitIdentity($request));
+        });
+    }
+
+    private function rateLimitIdentity(Request $request): string
+    {
+        $user = $request->user();
+
+        return $user !== null && method_exists($user, 'getAuthIdentifier')
+            ? 'user:'.(string) $user->getAuthIdentifier()
+            : 'ip:'.(string) $request->ip();
     }
 
     private function runtimeEnabled(): bool
