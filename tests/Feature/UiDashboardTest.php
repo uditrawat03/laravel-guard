@@ -45,6 +45,7 @@ final class UiDashboardTest extends TestCase
     {
         $this->get('/_guard')->assertOk()->assertSee('Laravel Guard')->assertSee('No scan evidence yet');
         $this->get('/_guard/assets/app.css')->assertOk()->assertHeader('Content-Type', 'text/css; charset=UTF-8');
+        $this->assertContains('throttle:120,1', app('router')->getRoutes()->getByName('laravel-guard.ui.overview')->gatherMiddleware());
     }
 
     public function test_dashboard_fails_closed_when_ability_is_missing(): void

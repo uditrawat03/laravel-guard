@@ -6,6 +6,7 @@ use LaravelGuard\Ui\Http\Controllers\DashboardController;
 $path = trim((string) config('laravel-guard.ui.path', 'laravel-guard'), '/');
 $middleware = array_values(array_filter((array) config('laravel-guard.ui.middleware', ['web', 'auth'])));
 $middleware[] = 'laravel-guard.ui.authorize';
+$middleware[] = 'throttle:120,1';
 
 Route::prefix($path)->middleware($middleware)->group(function (): void {
     Route::get('/', [DashboardController::class, 'show'])->name('laravel-guard.ui.overview');
