@@ -7,8 +7,8 @@ use LaravelGuard\Tests\TestCase;
 
 final class UiDisabledTest extends TestCase
 {
-    public function test_dashboard_routes_are_not_registered_by_default(): void
+    public function test_dashboard_routes_are_registered_during_package_discovery(): void
     {
-        $this->assertFalse(Route::has('laravel-guard.ui.overview'));
+        $this->assertTrue(Route::has('laravel-guard.ui.overview'));
     }
 }

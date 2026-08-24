@@ -60,6 +60,14 @@ final class UiDashboardTest extends TestCase
         $this->post('/_guard/scans')->assertRedirect('/_guard/overview');
     }
 
+    public function test_routes_remain_registered_when_dashboard_is_disabled(): void
+    {
+        config()->set('laravel-guard.ui.enabled', false);
+
+        $this->assertNotNull(app('router')->getRoutes()->getByName('laravel-guard.ui.overview'));
+        $this->get('/_guard')->assertNotFound();
+    }
+
     public function test_rule_catalog_uses_compact_package_pagination(): void
     {
         $this->get('/_guard/rules')

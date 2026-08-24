@@ -42,11 +42,11 @@ Use `--dev` for scanning in development and CI. Omit `--dev` when the applicatio
 
 Laravel Guard includes an optional, package-owned web interface for teams that need scan evidence outside the terminal. It presents the current security score, actionable findings, scan history, governed baselines, the installed rule catalog, runtime status, and `guard:doctor` diagnostics. The host application does not need dashboard controllers, models, migrations, Blade views, CSS, or a frontend build.
 
-The dashboard is disabled by default and fails closed unless the configured Gate ability exists and allows the current user. Enable it in `config/laravel-guard.php`:
+The package automatically registers its dashboard routes during Laravel package discovery. The dashboard is enabled by default, but access remains behind the configured middleware and fails closed unless the configured Gate ability exists and allows the current user. Set `LARAVEL_GUARD_UI=false` to disable it and return HTTP 404. Configure it in `config/laravel-guard.php`:
 
 ```php
 'ui' => [
-    'enabled' => env('LARAVEL_GUARD_UI', false),
+    'enabled' => env('LARAVEL_GUARD_UI', true),
     'path' => 'laravel-guard',
     'middleware' => ['web', 'auth'],
     'ability' => 'viewLaravelGuard',

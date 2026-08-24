@@ -15,6 +15,7 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Fixed
 
+- Dashboard routes are now registered automatically during package discovery regardless of configuration-cache state; disabled dashboards still fail closed at middleware level.
 - Separated dashboard browsing and scan submission rate-limit keys so normal navigation cannot cause a rescan to return HTTP 429.
 - Replaced framework pagination markup with compact package-owned controls and fingerprinted dashboard assets to prevent stale styles after upgrades.
 - The dashboard footer now reports the installed package version instead of historical scan metadata.

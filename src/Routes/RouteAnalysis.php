@@ -56,6 +56,10 @@ final class RouteAnalysis
 
     public static function ignored(Route $r, array $c): bool
     {
+        if (Str::is('laravel-guard.ui.*', (string) $r->getName())) {
+            return true;
+        }
+
         foreach ($c['ignore'] ?? [] as $pattern) {
             if (Str::is($pattern, $r->uri()) || Str::is($pattern, (string) $r->getName())) {
                 return true;

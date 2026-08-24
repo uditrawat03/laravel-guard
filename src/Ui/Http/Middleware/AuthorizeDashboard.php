@@ -13,6 +13,8 @@ final readonly class AuthorizeDashboard
 
     public function handle(Request $request, Closure $next): Response
     {
+        abort_unless((bool) config('laravel-guard.ui.enabled', false), 404);
+
         $ability = config('laravel-guard.ui.ability');
         abort_unless(is_string($ability) && trim($ability) !== '', 403);
         abort_unless($this->gate->has($ability) && $this->gate->allows($ability), 403);

@@ -38,7 +38,7 @@ return [
     ],
     'cache' => ['enabled' => true],
     'ui' => [
-        'enabled' => env('LARAVEL_GUARD_UI', false),
+        'enabled' => env('LARAVEL_GUARD_UI', true),
         'path' => 'laravel-guard',
         'middleware' => ['web', 'auth'],
         'ability' => 'viewLaravelGuard',

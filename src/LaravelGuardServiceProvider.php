@@ -83,10 +83,8 @@ final class LaravelGuardServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('guard.uploads', InspectUploadedFiles::class);
         $this->app['router']->aliasMiddleware('laravel-guard.ui.authorize', AuthorizeDashboard::class);
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-guard');
-        if ((bool) config('laravel-guard.ui.enabled', false)) {
-            $this->configureUiRateLimiting();
-            $this->loadRoutesFrom(__DIR__.'/../routes/ui.php');
-        }
+        $this->configureUiRateLimiting();
+        $this->loadRoutesFrom(__DIR__.'/../routes/ui.php');
         foreach (self::RULES as $rule) {
             $registry->register($rule);
         }
