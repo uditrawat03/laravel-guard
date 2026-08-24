@@ -17,6 +17,13 @@ All notable changes to this project are documented here. The project follows Sem
 - A packaged performance-report v1 JSON Schema and public Laravel 13 performance workflow with downloadable results.
 - A PCOV/Clover coverage workflow with a standalone verifier, downloadable report, GitHub summary, and enforced 75% statement threshold.
 - A scheduled and manually dispatchable full-catalog Infection workflow with an enforced 43% MSI/covered-MSI floor and downloadable survivor reports.
+- Repeatable `guard:benchmark --path` overrides for isolated representative source trees.
+- `guard:benchmark-runtime` query/upload overhead budgets with a packaged runtime-performance v1 JSON Schema.
+- Public small/medium/large scan and query/upload runtime matrices with downloadable reports.
+
+### Changed
+
+- Source files are enumerated and read once per scan context, avoiding repeated filesystem work across source-based rules.
 
 ### Fixed
 
