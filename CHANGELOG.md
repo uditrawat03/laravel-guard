@@ -16,6 +16,7 @@ All notable changes to this project are documented here. The project follows Sem
 ### Fixed
 
 - Replaced framework pagination markup with compact package-owned controls and fingerprinted dashboard assets to prevent stale styles after upgrades.
+- The dashboard footer now reports the installed package version instead of historical scan metadata.
 
 ## [0.1.2] - 2026-08-24
 

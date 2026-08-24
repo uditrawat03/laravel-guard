@@ -31,6 +31,7 @@ final class DashboardController extends Controller
             'diagnostics' => $this->dashboard->diagnostics(),
             'allowScan' => (bool) $this->config->get('laravel-guard.ui.allow_scan', false),
             'assetVersion' => substr(sha1_file($this->assetPath()), 0, 12),
+            'packageVersion' => $this->dashboard->version(),
         ]);
     }
 

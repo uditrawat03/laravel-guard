@@ -20,7 +20,7 @@
                 <a class="{{ $section === $key ? 'active' : '' }}" href="{{ $key === 'overview' ? route('laravel-guard.ui.overview') : route('laravel-guard.ui.section', ['section' => $key]) }}">{{ $label }}</a>
             @endforeach
         </nav>
-        <p class="guard-version">Package {{ $latest['package_version'] ?? 'ready' }}</p>
+        <p class="guard-version">Package {{ $packageVersion }}</p>
     </aside>
     <main>
         <header class="guard-header">

@@ -151,7 +151,7 @@ final readonly class SecurityDashboard
         return str_starts_with($path, $root) ? substr($path, strlen($root)) : basename($path);
     }
 
-    private function version(): string
+    public function version(): string
     {
         try {
             return InstalledVersions::getPrettyVersion('laravel-guard/laravel-guard') ?? 'dev';
