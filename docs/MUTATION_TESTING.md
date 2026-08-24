@@ -47,4 +47,4 @@ Use the detailed and per-mutator reports to prioritize security-critical behavio
 - **Covered MSI** applies the same calculation to mutations reached by the test suite.
 - **Mutation code coverage** indicates whether tests execute mutated code; it does not show whether assertions reject the mutation.
 
-The baseline has 100% mutation code coverage but only 43.19% MSI. That difference is why the survivor backlog remains explicitly listed in [pending features](PENDING_FEATURES.md).
+The baseline has 100% mutation code coverage but only 43.19% MSI. The surviving mutants remain a documented quality backlog until equivalent or stronger tests kill them.

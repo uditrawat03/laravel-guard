@@ -91,4 +91,4 @@ Severity is the default rating. A finding must still be reviewed in the context 
 
 Each finding includes its stable rule ID, module, severity, confidence, description, risk, recommendation, fingerprint, and source location when available. Static matching cannot prove exploitability or absence of a vulnerability. Review the actual data flow and security boundary, then fix the control or record a narrowly scoped suppression with a reason.
 
-See [pending and missing features](PENDING_FEATURES.md) for known analysis limitations.
+Known analysis limitations are documented with the applicable rules and command output.

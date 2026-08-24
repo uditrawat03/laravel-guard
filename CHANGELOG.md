@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The project follows Sem
 
 ## Unreleased
 
+## [0.2.0] - 2026-08-24
+
 ### Added
 
 - Lowest- and highest-dependency compatibility jobs for Laravel 10-13.
