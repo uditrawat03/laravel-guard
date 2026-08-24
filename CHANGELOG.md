@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The project follows Sem
 
 ## Unreleased
 
+### Added
+
+- An opt-in, package-owned security dashboard with findings, scan history, baselines, rule catalog, runtime status, and configuration diagnostics.
+- Fail-closed Gate authorization, a rate-limited browser scan action, redacted reports, private file-backed history, and retention controls.
+
 ## [0.1.2] - 2026-08-24
 
 ### Added

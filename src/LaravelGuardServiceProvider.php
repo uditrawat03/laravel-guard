@@ -24,6 +24,9 @@ use LaravelGuard\Runtime\SecurityEventCollector;
 use LaravelGuard\Tenant\Contracts\TenantResolver;
 use LaravelGuard\Tenant\TenantContext;
 use LaravelGuard\Tenant\TenantQueryInspector;
+use LaravelGuard\Ui\FileScanRunRepository;
+use LaravelGuard\Ui\Http\Middleware\AuthorizeDashboard;
+use LaravelGuard\Ui\ScanRunRepository;
 use LaravelGuard\Uploads\Runtime\InspectUploadedFiles;
 
 final class LaravelGuardServiceProvider extends ServiceProvider
@@ -68,12 +71,18 @@ final class LaravelGuardServiceProvider extends ServiceProvider
             return new TenantContext($resolver ? $app->make($resolver) : ($app->bound(TenantResolver::class) ? $app->make(TenantResolver::class) : null));
         });
         $this->app->singleton(LaravelGuard::class);
+        $this->app->singleton(ScanRunRepository::class, FileScanRunRepository::class);
     }
 
     public function boot(RuleRegistry $registry, ConfigurationIssueBag $issues): void
     {
         $this->publishes([__DIR__.'/../config/laravel-guard.php' => config_path('laravel-guard.php')], 'laravel-guard-config');
         $this->app['router']->aliasMiddleware('guard.uploads', InspectUploadedFiles::class);
+        $this->app['router']->aliasMiddleware('laravel-guard.ui.authorize', AuthorizeDashboard::class);
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-guard');
+        if ((bool) config('laravel-guard.ui.enabled', false)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/ui.php');
+        }
         foreach (self::RULES as $rule) {
             $registry->register($rule);
         }

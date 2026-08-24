@@ -38,6 +38,37 @@ No custom Composer repository or stability override is required. The `^0.1` cons
 
 Use `--dev` for scanning in development and CI. Omit `--dev` when the application uses runtime tenant or upload enforcement in production. Laravel package discovery registers the provider and commands automatically. Application PHP is parsed with `nikic/php-parser`; it is not included or executed by the scanner.
 
+## Security Dashboard
+
+Laravel Guard includes an optional, package-owned web interface for teams that need scan evidence outside the terminal. It presents the current security score, actionable findings, scan history, governed baselines, the installed rule catalog, runtime status, and `guard:doctor` diagnostics. The host application does not need dashboard controllers, models, migrations, Blade views, CSS, or a frontend build.
+
+The dashboard is disabled by default and fails closed unless the configured Gate ability exists and allows the current user. Enable it in `config/laravel-guard.php`:
+
+```php
+'ui' => [
+    'enabled' => env('LARAVEL_GUARD_UI', false),
+    'path' => 'laravel-guard',
+    'middleware' => ['web', 'auth'],
+    'ability' => 'viewLaravelGuard',
+    'allow_scan' => env('LARAVEL_GUARD_UI_ALLOW_SCAN', false),
+    'scan_on_first_view' => false,
+    'storage_path' => storage_path('app/laravel-guard/ui'),
+    'retention_days' => 30,
+    'per_page' => 25,
+],
+```
+
+Define the ability in the consuming application's authorization provider:
+
+```php
+use Illuminate\Support\Facades\Gate;
+
+Gate::define('viewLaravelGuard', fn ($user) => $user->canManageSecurity());
+```
+
+Set `LARAVEL_GUARD_UI=true`, clear cached configuration, and visit `/laravel-guard`. Set `LARAVEL_GUARD_UI_ALLOW_SCAN=true` only for trusted security operators who should be able to start a scan from the browser. The POST action is rate limited; all dashboard routes also use the configured middleware and Gate ability.
+
+Scan history is stored as atomic, versioned JSON reports under the configured private storage path, with automatic retention cleanup. Browser reports omit finding metadata, redact the application root, and expose source locations only as application-relative paths. No package migration is required. For a production dashboard installation, install Laravel Guard without `--dev` so Composer deploys it with the application.
 ## Commands
 
 ```bash

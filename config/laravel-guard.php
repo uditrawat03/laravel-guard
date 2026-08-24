@@ -37,4 +37,15 @@ return [
         'owner' => env('LARAVEL_GUARD_BASELINE_OWNER'),
     ],
     'cache' => ['enabled' => true],
+    'ui' => [
+        'enabled' => env('LARAVEL_GUARD_UI', false),
+        'path' => 'laravel-guard',
+        'middleware' => ['web', 'auth'],
+        'ability' => 'viewLaravelGuard',
+        'allow_scan' => env('LARAVEL_GUARD_UI_ALLOW_SCAN', false),
+        'scan_on_first_view' => false,
+        'storage_path' => storage_path('app/laravel-guard/ui'),
+        'retention_days' => 30,
+        'per_page' => 25,
+    ],
 ];
