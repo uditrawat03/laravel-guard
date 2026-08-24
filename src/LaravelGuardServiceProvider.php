@@ -11,6 +11,7 @@ use LaravelGuard\Commands\DiffCommand;
 use LaravelGuard\Commands\DoctorCommand;
 use LaravelGuard\Commands\ExplainRuleCommand;
 use LaravelGuard\Commands\ListRulesCommand;
+use LaravelGuard\Commands\RuntimeBenchmarkCommand;
 use LaravelGuard\Commands\ScanCommand;
 use LaravelGuard\Core\Contracts\SecurityContext;
 use LaravelGuard\Core\Diagnostics\ConfigurationIssueBag;
@@ -97,7 +98,7 @@ final class LaravelGuardServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ScanCommand::class, CheckCommand::class, DiffCommand::class, BaselineCommand::class,
-                ListRulesCommand::class, BenchmarkCommand::class, DoctorCommand::class, ExplainRuleCommand::class,
+                ListRulesCommand::class, BenchmarkCommand::class, RuntimeBenchmarkCommand::class, DoctorCommand::class, ExplainRuleCommand::class,
             ]);
         }
     }

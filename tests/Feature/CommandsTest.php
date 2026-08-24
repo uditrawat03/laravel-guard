@@ -36,6 +36,25 @@ final class CommandsTest extends TestCase
             ->assertSuccessful();
     }
 
+    public function test_benchmark_can_isolate_explicit_source_paths(): void
+    {
+        $this->artisan('guard:benchmark', [
+            '--runs' => 1,
+            '--module' => 'uploads',
+            '--path' => [__DIR__.'/../Fixtures/UnsafeQueries.php'],
+            '--format' => 'json',
+        ])
+            ->expectsOutputToContain('"findings":0')
+            ->assertSuccessful();
+    }
+
+    public function test_runtime_benchmark_emits_machine_readable_query_metrics(): void
+    {
+        $this->artisan('guard:benchmark-runtime', ['scenario' => 'query', '--runs' => 2, '--operations' => 2, '--format' => 'json'])
+            ->expectsOutputToContain('"schema":"laravel-guard/runtime-performance","schema_version":1,"scenario":"query"')
+            ->assertSuccessful();
+    }
+
     public function test_benchmark_fails_when_a_performance_budget_is_exceeded(): void
     {
         $this->artisan('guard:benchmark', [
@@ -44,6 +63,18 @@ final class CommandsTest extends TestCase
             '--max-memory-mb' => 0,
         ])
             ->expectsOutputToContain('exceeds the 0.000 MB budget')
+            ->assertFailed();
+    }
+
+    public function test_runtime_benchmark_fails_when_an_overhead_budget_is_exceeded(): void
+    {
+        $this->artisan('guard:benchmark-runtime', [
+            'scenario' => 'upload',
+            '--runs' => 2,
+            '--operations' => 2,
+            '--max-p95-us' => 0,
+        ])
+            ->expectsOutputToContain('exceeds the 0.000 us/op budget')
             ->assertFailed();
     }
 }

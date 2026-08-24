@@ -8,7 +8,7 @@ use LaravelGuard\LaravelGuard;
 
 final class BenchmarkCommand extends Command
 {
-    protected $signature = 'guard:benchmark {--runs=5 : Number of scans} {--module= : Limit benchmark to a module} {--format=console : console or json} {--max-p95-ms= : Fail when warm P95 exceeds this duration} {--max-memory-mb= : Fail when peak memory exceeds this amount}';
+    protected $signature = 'guard:benchmark {--runs=5 : Number of scans} {--module= : Limit benchmark to a module} {--path=* : Override source paths for this benchmark} {--format=console : console or json} {--max-p95-ms= : Fail when warm P95 exceeds this duration} {--max-memory-mb= : Fail when peak memory exceeds this amount}';
 
     protected $description = 'Measure Laravel Guard scan duration and peak memory';
 
@@ -23,11 +23,15 @@ final class BenchmarkCommand extends Command
             return self::INVALID;
         }
 
+        $paths = array_values(array_filter(
+            (array) $this->option('path'),
+            static fn (mixed $path): bool => is_string($path) && trim($path) !== '',
+        ));
         $findings = 0;
         for ($index = 0; $index < $runs; $index++) {
             $start = hrtime(true);
             memory_reset_peak_usage();
-            $findings = $guard->scan($this->option('module'))->count();
+            $findings = $guard->scan($this->option('module'), $paths === [] ? null : $paths)->count();
             $durations[] = (hrtime(true) - $start) / 1_000_000;
         }
         $warmDurations = array_slice($durations, 1) ?: $durations;

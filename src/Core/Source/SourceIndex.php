@@ -19,9 +19,13 @@ final class SourceIndex
 
     private readonly Parser $parser;
 
+    /** @var \WeakMap<SecurityContext, array<string, SourceFile>> */
+    private readonly \WeakMap $scanCache;
+
     public function __construct(private readonly PhpFileScanner $files)
     {
         $this->parser = (new ParserFactory)->createForNewestSupportedVersion();
+        $this->scanCache = new \WeakMap;
     }
 
     /** @return iterable<string, SourceFile> */
@@ -29,15 +33,24 @@ final class SourceIndex
     {
         $paths = $context->config['paths'] ?? [$context->path('app'), $context->path('routes')];
         $excluded = $context->config['exclude_paths'] ?? [];
+        if (isset($this->scanCache[$context])) {
+            yield from $this->scanCache[$context];
 
+            return;
+        }
+
+        $indexed = [];
         foreach ($this->files->files($paths, $excluded) as $path => $source) {
             $key = $path.':'.hash('xxh128', $source);
             if (! isset($this->cache[$key])) {
                 $this->cache[$key] = $this->parse($path, $source);
             }
 
-            yield $path => $this->cache[$key];
+            $indexed[$path] = $this->cache[$key];
         }
+        $this->scanCache[$context] = $indexed;
+
+        yield from $indexed;
     }
 
     /** @return iterable<CallSite> */

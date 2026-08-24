@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:laravel-guard:schema:runtime-performance:1",
+  "title": "Laravel Guard runtime performance report v1",
+  "type": "object",
+  "required": ["schema", "schema_version", "scenario", "runs", "operations_per_run", "average_us", "p95_us", "peak_memory_mb", "status", "violations"],
+  "properties": {
+    "schema": {"const": "laravel-guard/runtime-performance"},
+    "schema_version": {"const": 1},
+    "scenario": {"enum": ["query", "upload"]},
+    "runs": {"type": "integer", "minimum": 1, "maximum": 100},
+    "operations_per_run": {"type": "integer", "minimum": 1, "maximum": 1000000},
+    "average_us": {"type": "number", "minimum": 0},
+    "p95_us": {"type": "number", "minimum": 0},
+    "peak_memory_mb": {"type": "number", "minimum": 0},
+    "status": {"enum": ["pass", "fail"]},
+    "violations": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

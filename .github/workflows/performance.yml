@@ -6,8 +6,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  benchmark:
-    name: Laravel 13 / PHP 8.3
+  scan:
+    name: Scan / ${{ matrix.size }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - size: small
+            files: 25
+            max_p95_ms: 750
+            max_memory_mb: 128
+          - size: medium
+            files: 250
+            max_p95_ms: 2000
+            max_memory_mb: 192
+          - size: large
+            files: 1000
+            max_p95_ms: 5000
+            max_memory_mb: 256
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -18,13 +34,48 @@ jobs:
       - run: composer require --dev "orchestra/testbench:^11.0" --no-update
       - run: composer update --prefer-dist --no-interaction
       - run: mkdir -p build
-      - name: Enforce warm scan and memory budgets
+      - name: Generate representative Laravel source tree
+        run: php .github/scripts/generate-performance-fixture.php "build/fixtures/${{ matrix.size }}" "${{ matrix.files }}"
+      - name: Enforce scan and memory budgets
         run: |
           set -o pipefail
-          vendor/bin/testbench guard:benchmark --runs=10 --format=json --max-p95-ms=500 --max-memory-mb=128 | tee build/performance.json
+          vendor/bin/testbench guard:benchmark --runs=5 --path="build/fixtures/${{ matrix.size }}" --format=json --max-p95-ms="${{ matrix.max_p95_ms }}" --max-memory-mb="${{ matrix.max_memory_mb }}" | tee "build/performance-${{ matrix.size }}.json"
       - uses: actions/upload-artifact@v6
         if: ${{ always() }}
         with:
-          name: performance-report
-          path: build/performance.json
+          name: scan-performance-${{ matrix.size }}
+          path: build/performance-${{ matrix.size }}.json
+          if-no-files-found: error
+
+  runtime:
+    name: Runtime / ${{ matrix.scenario }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scenario: query
+            operations: 20000
+            max_p95_us: 50
+          - scenario: upload
+            operations: 500
+            max_p95_us: 1000
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: composer require --dev "orchestra/testbench:^11.0" --no-update
+      - run: composer update --prefer-dist --no-interaction
+      - run: mkdir -p build
+      - name: Enforce runtime overhead and memory budgets
+        run: |
+          set -o pipefail
+          vendor/bin/testbench guard:benchmark-runtime "${{ matrix.scenario }}" --runs=10 --operations="${{ matrix.operations }}" --format=json --max-p95-us="${{ matrix.max_p95_us }}" --max-memory-mb=128 | tee "build/runtime-${{ matrix.scenario }}.json"
+      - uses: actions/upload-artifact@v6
+        if: ${{ always() }}
+        with:
+          name: runtime-performance-${{ matrix.scenario }}
+          path: build/runtime-${{ matrix.scenario }}.json
           if-no-files-found: error

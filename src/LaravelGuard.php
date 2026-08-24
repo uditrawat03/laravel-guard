@@ -20,9 +20,14 @@ final readonly class LaravelGuard
         private IntegrationManager $integrations,
     ) {}
 
-    public function scan(?string $module = null): FindingCollection
+    /** @param list<string>|null $paths */
+    public function scan(?string $module = null, ?array $paths = null): FindingCollection
     {
-        $findings = $this->scanner->scan(new SecurityContext($this->context->app, $this->context->config, $module));
+        $config = $this->context->config;
+        if ($paths !== null) {
+            $config['paths'] = $paths;
+        }
+        $findings = $this->scanner->scan(new SecurityContext($this->context->app, $config, $module));
         $this->integrations->publish($findings);
 
         return $findings;
