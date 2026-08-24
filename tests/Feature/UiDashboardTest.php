@@ -57,6 +57,15 @@ final class UiDashboardTest extends TestCase
             ->assertDontSee('<svg', false);
     }
 
+    public function test_doctor_uses_compact_diagnostic_layout(): void
+    {
+        $this->get('/_guard/doctor')
+            ->assertOk()
+            ->assertSee('guard-doctor-summary', false)
+            ->assertSee('guard-diagnostic-status pass', false)
+            ->assertSee('configuration checks');
+    }
+
     public function test_dashboard_fails_closed_when_ability_is_missing(): void
     {
         config()->set('laravel-guard.ui.ability', 'undefinedLaravelGuardAbility');

@@ -63,7 +63,29 @@
             <section class="guard-summary"><div><span>Runtime guard</span><strong>{{ $runtime['enabled'] ? 'Enabled' : 'Disabled' }}</strong></div><div><span>Current request events</span><strong>{{ count($runtime['events']) }}</strong></div><div><span>Environments</span><strong>{{ implode(', ', $runtime['environments']) ?: 'None' }}</strong></div></section>
             <section class="guard-panel"><div class="guard-list">@forelse($runtime['events'] as $event)<article class="guard-row"><code>{{ $event['rule_id'] }}</code><div><strong>{{ $event['message'] }}</strong><p>{{ $event['file'] }}{{ $event['line'] ? ':'.$event['line'] : '' }} | {{ $event['created_at'] }}</p></div></article>@empty<p class="guard-empty">No runtime events were collected during this request.</p>@endforelse</div></section>
         @elseif($section === 'doctor')
-            <section class="guard-panel"><div class="guard-list">@foreach($diagnostics as $diagnostic)<article class="guard-row"><span class="guard-status {{ $diagnostic['status'] }}">{{ $diagnostic['status'] }}</span><div><strong>{{ $diagnostic['check'] }}</strong><p>{{ $diagnostic['message'] }}</p>@if(isset($diagnostic['remediation']))<small>{{ $diagnostic['remediation'] }}</small>@endif</div></article>@endforeach</div></section>
+            @php
+                $doctorCounts = ['pass' => 0, 'warning' => 0, 'error' => 0];
+                foreach ($diagnostics as $diagnostic) {
+                    $doctorCounts[$diagnostic['status']] = ($doctorCounts[$diagnostic['status']] ?? 0) + 1;
+                }
+            @endphp
+            <section class="guard-doctor-summary">
+                <div class="pass"><span>Healthy checks</span><strong>{{ $doctorCounts['pass'] }}</strong></div>
+                <div class="warning"><span>Needs attention</span><strong>{{ $doctorCounts['warning'] }}</strong></div>
+                <div class="error"><span>Configuration errors</span><strong>{{ $doctorCounts['error'] }}</strong></div>
+            </section>
+            <section class="guard-panel guard-diagnostics-panel">
+                <div class="guard-table-meta"><strong>{{ count($diagnostics) }} configuration checks</strong><span>Live package diagnostics</span></div>
+                <div class="guard-diagnostics">
+                    @foreach($diagnostics as $diagnostic)
+                        <article class="guard-diagnostic">
+                            <div class="guard-diagnostic-status {{ $diagnostic['status'] }}"><span></span>{{ $diagnostic['status'] }}</div>
+                            <strong class="guard-diagnostic-check">{{ $diagnostic['check'] }}</strong>
+                            <div class="guard-diagnostic-detail"><p>{{ $diagnostic['message'] }}</p>@if(isset($diagnostic['remediation']))<small>{{ $diagnostic['remediation'] }}</small>@endif</div>
+                        </article>
+                    @endforeach
+                </div>
+            </section>
         @endif
     </main>
 </div>

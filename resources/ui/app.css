@@ -324,3 +324,79 @@ code { font: 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; overfl
     .guard-pagination > div { width: 100%; overflow-x: auto; }
     th, td { padding: 11px 13px; }
 }
+/* Operational diagnostics use their own compact information layout. */
+.guard-header,
+main > section,
+main > .guard-notice {
+    width: 100%;
+    max-width: 1380px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.guard-row { align-items: start; }
+.guard-row > .guard-badge,
+.guard-row > .guard-status { justify-self: start; align-self: start; }
+
+.guard-doctor-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.guard-doctor-summary > div {
+    min-height: 92px;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-top: 3px solid currentColor;
+    border-radius: 6px;
+    background: var(--surface);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    color: var(--ink);
+}
+
+.guard-doctor-summary > div.pass { border-top-color: var(--low); }
+.guard-doctor-summary > div.warning { border-top-color: var(--medium); }
+.guard-doctor-summary > div.error { border-top-color: var(--critical); }
+.guard-doctor-summary span { color: var(--muted); font-size: 12px; font-weight: 650; }
+.guard-doctor-summary strong { font-size: 30px; line-height: 1; }
+
+.guard-diagnostics-panel { padding: 0; }
+.guard-diagnostics { display: grid; }
+.guard-diagnostic {
+    min-height: 68px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line-soft);
+    display: grid;
+    grid-template-columns: 92px minmax(180px, 260px) minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+}
+.guard-diagnostic:last-child { border-bottom: 0; }
+.guard-diagnostic:hover { background: #fafbfb; }
+.guard-diagnostic-status {
+    padding-top: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.guard-diagnostic-status span { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: currentColor; }
+.guard-diagnostic-status.pass { color: var(--low); }
+.guard-diagnostic-status.warning { color: var(--medium); }
+.guard-diagnostic-status.error { color: var(--critical); }
+.guard-diagnostic-check { overflow-wrap: anywhere; }
+.guard-diagnostic-detail p { margin: 0; color: var(--ink-soft); }
+.guard-diagnostic-detail small { display: block; margin-top: 4px; color: var(--muted); }
+
+@media (max-width: 760px) {
+    .guard-doctor-summary { grid-template-columns: 1fr; }
+    .guard-doctor-summary > div { min-height: 70px; }
+    .guard-diagnostic { grid-template-columns: 90px minmax(0, 1fr); gap: 8px 14px; }
+    .guard-diagnostic-detail { grid-column: 1 / -1; }
+}
