@@ -6,7 +6,7 @@ on:
       release_version:
         description: Stable version to install and restore
         required: true
-        default: '0.2.0'
+        default: '0.1.2'
       rollback_version:
         description: Previous stable version used by the rollback drill
         required: true
@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  RELEASE_VERSION: ${{ inputs.release_version || '0.2.0' }}
+  RELEASE_VERSION: ${{ inputs.release_version || '0.1.2' }}
   ROLLBACK_VERSION: ${{ inputs.rollback_version || '0.1.1' }}
 
 jobs:

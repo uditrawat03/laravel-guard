@@ -25,16 +25,16 @@ Laravel 10 and 11 compatibility is retained for existing applications, but those
 
 ## Installation
 
-Install the stable `0.2` series directly from Packagist:
+Install the stable `0.1` series directly from Packagist:
 
 ```bash
-composer require --dev laravel-guard/laravel-guard:^0.2
+composer require --dev laravel-guard/laravel-guard:^0.1
 php artisan vendor:publish --tag=laravel-guard-config
 php artisan guard:doctor
 php artisan guard:scan
 ```
 
-No custom Composer repository or stability override is required. The `^0.2` constraint installs tagged releases instead of `dev-main` and accepts backwards-compatible `0.2.x` fixes. Confirm the resolved version with `composer show laravel-guard/laravel-guard`.
+No custom Composer repository or stability override is required. The `^0.1` constraint installs tagged releases instead of `dev-main` and accepts backwards-compatible `0.1.x` fixes. Confirm the resolved version with `composer show laravel-guard/laravel-guard`.
 
 Use `--dev` for scanning in development and CI. Omit `--dev` when the application uses runtime tenant or upload enforcement in production. Laravel package discovery registers the provider and commands automatically. Application PHP is parsed with `nikic/php-parser`; it is not included or executed by the scanner.
 
