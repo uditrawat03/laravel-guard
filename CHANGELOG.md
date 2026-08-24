@@ -11,6 +11,7 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Changed
 
+- Local and testing environments receive a secure authenticated-user fallback for the default dashboard Gate, while production remains fail closed until the consuming application defines the ability.
 - Refined the dashboard layout, navigation, tables, filters, responsive behavior, and information hierarchy.
 
 ### Fixed

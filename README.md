@@ -42,7 +42,7 @@ Use `--dev` for scanning in development and CI. Omit `--dev` when the applicatio
 
 Laravel Guard includes an optional, package-owned web interface for teams that need scan evidence outside the terminal. It presents the current security score, actionable findings, scan history, governed baselines, the installed rule catalog, runtime status, and `guard:doctor` diagnostics. The host application does not need dashboard controllers, models, migrations, Blade views, CSS, or a frontend build.
 
-The package automatically registers its dashboard routes during Laravel package discovery. The dashboard is enabled by default, but access remains behind the configured middleware and fails closed unless the configured Gate ability exists and allows the current user. Set `LARAVEL_GUARD_UI=false` to disable it and return HTTP 404. Configure it in `config/laravel-guard.php`:
+The package automatically registers its dashboard routes during Laravel package discovery. In `local` and `testing`, authenticated users receive zero-setup access through a package-defined fallback Gate. Production remains fail closed and requires the consuming application to define the configured ability. Set `LARAVEL_GUARD_UI=false` to disable the dashboard and return HTTP 404. Configure it in `config/laravel-guard.php`:
 
 ```php
 'ui' => [
@@ -62,7 +62,7 @@ The package automatically registers its dashboard routes during Laravel package 
 
 Dashboard requests and scan submissions use separate per-user (or per-IP for guests) rate-limit buckets. Browsing the interface therefore never consumes the scan allowance. Adjust `read_rate_limit` and `scan_rate_limit` to set their independent per-minute limits.
 
-Define the ability in the consuming application's authorization provider:
+Define the ability in the consuming application's authorization provider for production access or stricter local role checks:
 
 ```php
 use Illuminate\Support\Facades\Gate;
@@ -70,7 +70,7 @@ use Illuminate\Support\Facades\Gate;
 Gate::define('viewLaravelGuard', fn ($user) => $user->canManageSecurity());
 ```
 
-Set `LARAVEL_GUARD_UI=true`, clear cached configuration, and visit `/laravel-guard`. Set `LARAVEL_GUARD_UI_ALLOW_SCAN=true` only for trusted security operators who should be able to start a scan from the browser. The POST action is rate limited; all dashboard routes also use the configured middleware and Gate ability.
+Clear cached configuration and visit `/laravel-guard` while authenticated. Set `LARAVEL_GUARD_UI_ALLOW_SCAN=true` only for trusted security operators who should be able to start a scan from the browser. The POST action is rate limited; all dashboard routes use the configured middleware and Gate ability.
 
 Scan history is stored as atomic, versioned JSON reports under the configured private storage path, with automatic retention cleanup. Browser reports omit finding metadata, redact the application root, and expose source locations only as application-relative paths. No package migration is required. For a production dashboard installation, install Laravel Guard without `--dev` so Composer deploys it with the application.
 ## Commands

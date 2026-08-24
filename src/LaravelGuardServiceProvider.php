@@ -5,6 +5,7 @@ namespace LaravelGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use LaravelGuard\Commands\BaselineCommand;
@@ -83,6 +84,7 @@ final class LaravelGuardServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('guard.uploads', InspectUploadedFiles::class);
         $this->app['router']->aliasMiddleware('laravel-guard.ui.authorize', AuthorizeDashboard::class);
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-guard');
+        $this->configureUiAuthorization();
         $this->configureUiRateLimiting();
         $this->loadRoutesFrom(__DIR__.'/../routes/ui.php');
         foreach (self::RULES as $rule) {
@@ -112,6 +114,20 @@ final class LaravelGuardServiceProvider extends ServiceProvider
                 ListRulesCommand::class, BenchmarkCommand::class, RuntimeBenchmarkCommand::class, DoctorCommand::class, ExplainRuleCommand::class,
             ]);
         }
+    }
+
+    private function configureUiAuthorization(): void
+    {
+        $ability = config('laravel-guard.ui.ability');
+
+        if (! $this->app->environment('local', 'testing')
+            || ! is_string($ability)
+            || trim($ability) === ''
+            || Gate::has($ability)) {
+            return;
+        }
+
+        Gate::define($ability, static fn ($user): bool => $user !== null);
     }
 
     private function configureUiRateLimiting(): void
