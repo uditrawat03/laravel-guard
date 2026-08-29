@@ -18,6 +18,12 @@ SARIF keeps its standard top-level `version` and `$schema`. Laravel Guard adds `
 
 JUnit includes `laravel-guard.schema` and `laravel-guard.schema-version` properties in the generated test suite. Existing testcase and failure elements are unchanged.
 
+## Automated conformance
+
+The package test suite uses a standards-based Draft 2020-12 validator to check real JSON reporter, security diff, governed baseline, scan benchmark, and runtime benchmark documents. The retained runtime-performance v1 schema is checked with a compatible legacy document. Because these tests run inside the main compatibility workflow, schema conformance is enforced across Laravel 10-13, PHP 8.2-8.4, Windows, and both highest and lowest supported dependency sets.
+
+A command returning successful JSON is not sufficient by itself: CI also requires the output to satisfy field types, required keys, enum values, numeric bounds, formats, and strict `additionalProperties` rules declared by its packaged schema.
+
 ## Compatibility policy
 
 - New optional fields may be added within the same schema version.

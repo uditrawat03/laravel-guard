@@ -109,7 +109,7 @@ php artisan guard:benchmark-runtime worker --runs=10 --operations=1000 --max-mem
 `guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt. Governed baselines record an owner, acceptance reason, and expiration; expired entries automatically stop suppressing findings.
 
 See [Baseline governance](docs/BASELINES.md) for schema compatibility, maintenance commands, CI behavior, and configuration.
-Machine-readable outputs carry independent schema identities and versions. See [Output schemas](docs/OUTPUT_SCHEMAS.md) for contract definitions and compatibility rules, and [Upgrading](docs/UPGRADING.md) for consumer migration notes.
+Machine-readable outputs carry independent schema identities and versions. Real report, diff, baseline, scan-performance, and runtime-performance documents are validated against every packaged Draft 2020-12 schema by the Laravel 10-13 highest/lowest dependency CI matrix. See [Output schemas](docs/OUTPUT_SCHEMAS.md) for contract definitions and compatibility rules, and [Upgrading](docs/UPGRADING.md) for consumer migration notes.
 
 ## Security Coverage
 
