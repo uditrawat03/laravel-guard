@@ -56,9 +56,15 @@ jobs:
           - scenario: query
             operations: 20000
             max_p95_us: 50
+            max_memory_growth_mb: 16
           - scenario: upload
             operations: 500
             max_p95_us: 1000
+            max_memory_growth_mb: 16
+          - scenario: worker
+            operations: 1000
+            max_p95_us: 2000
+            max_memory_growth_mb: 16
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -72,7 +78,7 @@ jobs:
       - name: Enforce runtime overhead and memory budgets
         run: |
           set -o pipefail
-          vendor/bin/testbench guard:benchmark-runtime "${{ matrix.scenario }}" --runs=10 --operations="${{ matrix.operations }}" --format=json --max-p95-us="${{ matrix.max_p95_us }}" --max-memory-mb=128 | tee "build/runtime-${{ matrix.scenario }}.json"
+          vendor/bin/testbench guard:benchmark-runtime "${{ matrix.scenario }}" --runs=10 --operations="${{ matrix.operations }}" --format=json --max-p95-us="${{ matrix.max_p95_us }}" --max-memory-mb=128 --max-memory-growth-mb="${{ matrix.max_memory_growth_mb }}" | tee "build/runtime-${{ matrix.scenario }}.json"
       - uses: actions/upload-artifact@v6
         if: ${{ always() }}
         with:

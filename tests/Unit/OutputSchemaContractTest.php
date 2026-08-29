@@ -58,6 +58,7 @@ final class OutputSchemaContractTest extends TestCase
             'baseline-v3.json' => 'urn:laravel-guard:schema:baseline:3',
             'performance-v1.json' => 'urn:laravel-guard:schema:performance:1',
             'runtime-performance-v1.json' => 'urn:laravel-guard:schema:runtime-performance:1',
+            'runtime-performance-v2.json' => 'urn:laravel-guard:schema:runtime-performance:2',
         ];
 
         foreach ($expected as $file => $id) {

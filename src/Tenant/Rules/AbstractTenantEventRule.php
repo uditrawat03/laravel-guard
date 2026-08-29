@@ -2,6 +2,7 @@
 
 namespace LaravelGuard\Tenant\Rules;
 
+use Illuminate\Contracts\Container\Container;
 use LaravelGuard\Core\Contracts\SecurityContext;
 use LaravelGuard\Core\Findings\Confidence;
 use LaravelGuard\Core\Findings\SecurityFinding;
@@ -10,7 +11,7 @@ use LaravelGuard\Runtime\SecurityEventCollector;
 
 abstract class AbstractTenantEventRule extends AbstractGuardRule
 {
-    public function __construct(private readonly SecurityEventCollector $events) {}
+    public function __construct(private readonly Container $container) {}
 
     public function category(): string
     {
@@ -19,7 +20,9 @@ abstract class AbstractTenantEventRule extends AbstractGuardRule
 
     public function scan(SecurityContext $context): iterable
     {
-        foreach ($this->events->forRule($this->id()) as $event) {
+        $events = $this->container->make(SecurityEventCollector::class);
+
+        foreach ($events->forRule($this->id()) as $event) {
             yield SecurityFinding::fromRule($this, $event->message, $this->risk(), $this->recommendation(), Confidence::High, $event->file, $event->line, $event->metadata);
         }
     }

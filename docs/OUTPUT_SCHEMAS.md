@@ -10,7 +10,7 @@ Laravel Guard versions each machine-readable contract independently. Consumers s
 | `guard:diff --format=json` | `laravel-guard/diff` | 1 | `resources/schemas/diff-v1.json` |
 | `.laravel-guard-baseline.json` | `laravel-guard/baseline` | 3 | `resources/schemas/baseline-v3.json` |
 | `guard:benchmark --format=json` | `laravel-guard/performance` | 1 | `resources/schemas/performance-v1.json` |
-| `guard:benchmark-runtime --format=json` | `laravel-guard/runtime-performance` | 1 | `resources/schemas/runtime-performance-v1.json` |
+| `guard:benchmark-runtime --format=json` | `laravel-guard/runtime-performance` | 2 | `resources/schemas/runtime-performance-v2.json` |
 | SARIF | SARIF 2.1.0 | Laravel Guard report contract 1 | Official SARIF schema plus run properties |
 | JUnit | `laravel-guard/junit` | 1 | Suite properties documented below |
 
@@ -26,6 +26,7 @@ JUnit includes `laravel-guard.schema` and `laravel-guard.schema-version` propert
 - New enum values may be added when Laravel Guard adds a severity, confidence, or status.
 - Readers should ignore unknown fields and reject unsupported major schema versions clearly.
 - Baseline schemas 1 and 2 remain readable. New baseline writes use schema 3.
+- Runtime-performance schema 1 remains packaged. Version 2 adds the `worker` scenario plus required `memory_growth_mb` and `state_leaks` metrics.
 - SARIF remains valid SARIF 2.1.0; the Laravel Guard property version covers package-specific conventions.
 
 The PHP constants live in `LaravelGuard\Core\Support\OutputSchema`. Packaged JSON Schema documents use JSON Schema Draft 2020-12 and stable URN identifiers.

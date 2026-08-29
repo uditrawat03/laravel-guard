@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Added
 
+- A long-running worker benchmark that flushes Laravel scopes, detects retained event state, enforces memory-growth budgets, and emits the runtime-performance v2 contract.
+
 - Canonical, safely configurable rule-documentation URLs in serialized findings, SARIF `helpUri` output, persisted dashboard evidence, and GUI finding actions.
 - An opt-in, package-owned security dashboard with findings, scan history, baselines, rule catalog, runtime status, and configuration diagnostics.
 - Fail-closed Gate authorization, a rate-limited browser scan action, redacted reports, private file-backed history, and retention controls.
@@ -17,6 +19,7 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Fixed
 
+- Tenant runtime rules now resolve the current scoped event collector during each scan instead of retaining the collector from package boot in long-running workers.
 - Dashboard routes are now registered automatically during package discovery regardless of configuration-cache state; disabled dashboards still fail closed at middleware level.
 - Separated dashboard browsing and scan submission rate-limit keys so normal navigation cannot cause a rescan to return HTTP 429.
 - Replaced framework pagination markup with compact package-owned controls and fingerprinted dashboard assets to prevent stale styles after upgrades.

@@ -26,7 +26,7 @@ final class OutputSchema
 
     public const RUNTIME_PERFORMANCE = 'laravel-guard/runtime-performance';
 
-    public const RUNTIME_PERFORMANCE_VERSION = 1;
+    public const RUNTIME_PERFORMANCE_VERSION = 2;
 
     private function __construct() {}
 }

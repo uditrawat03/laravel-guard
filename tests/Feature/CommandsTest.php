@@ -2,6 +2,7 @@
 
 namespace LaravelGuard\Tests\Feature;
 
+use Illuminate\Support\Facades\Artisan;
 use LaravelGuard\Tests\TestCase;
 
 final class CommandsTest extends TestCase
@@ -51,8 +52,24 @@ final class CommandsTest extends TestCase
     public function test_runtime_benchmark_emits_machine_readable_query_metrics(): void
     {
         $this->artisan('guard:benchmark-runtime', ['scenario' => 'query', '--runs' => 2, '--operations' => 2, '--format' => 'json'])
-            ->expectsOutputToContain('"schema":"laravel-guard/runtime-performance","schema_version":1,"scenario":"query"')
+            ->expectsOutputToContain('"schema":"laravel-guard/runtime-performance","schema_version":2,"scenario":"query"')
             ->assertSuccessful();
+    }
+
+    public function test_runtime_benchmark_detects_clean_worker_scopes(): void
+    {
+        $exitCode = Artisan::call('guard:benchmark-runtime', [
+            'scenario' => 'worker',
+            '--runs' => 2,
+            '--operations' => 3,
+            '--format' => 'json',
+            '--max-memory-growth-mb' => 16,
+        ]);
+        $output = Artisan::output();
+
+        $this->assertSame(0, $exitCode);
+        $this->assertStringContainsString('"schema_version":2,"scenario":"worker"', $output);
+        $this->assertStringContainsString('"state_leaks":0', $output);
     }
 
     public function test_benchmark_fails_when_a_performance_budget_is_exceeded(): void
