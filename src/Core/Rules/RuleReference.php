@@ -6,6 +6,8 @@ use LaravelGuard\Core\Contracts\GuardRule;
 
 final class RuleReference
 {
+    private const DOCUMENTATION_URL = 'https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#{rule}';
+
     private const GUIDANCE = [
         'configuration' => [
             'why' => 'Insecure framework or environment settings can expose application data before business-level authorization is reached.',
@@ -67,6 +69,22 @@ final class RuleReference
             'how_to_respond' => $guidance['respond'],
             'analysis_limits' => $guidance['limits'],
             'documentation' => 'docs/RULES.md#'.strtolower($rule->id()),
+            'documentation_url' => self::documentationUrl($rule->id()),
         ];
+    }
+
+    public static function documentationUrl(string $ruleId): string
+    {
+        $template = trim((string) config('laravel-guard.documentation_url', self::DOCUMENTATION_URL));
+        $template = $template !== '' ? $template : self::DOCUMENTATION_URL;
+        $url = str_replace(['{rule}', '{RULE}'], [strtolower($ruleId), strtoupper($ruleId)], $template);
+
+        if (! in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)) {
+            return str_replace('{rule}', strtolower($ruleId), self::DOCUMENTATION_URL);
+        }
+
+        return str_contains($url, strtolower($ruleId)) || str_contains($url, strtoupper($ruleId))
+            ? $url
+            : rtrim($url, '#').'#'.strtolower($ruleId);
     }
 }

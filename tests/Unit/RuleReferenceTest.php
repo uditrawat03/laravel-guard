@@ -16,7 +16,20 @@ final class RuleReferenceTest extends TestCase
             $reference = RuleReference::for($rule);
             $this->assertNotSame('', $reference['why_it_matters']);
             $this->assertNotSame('', $reference['how_to_respond']);
+            $this->assertSame('https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#'.strtolower($rule->id()), $reference['documentation_url']);
             $this->assertStringContainsString('id="'.strtolower($rule->id()).'"', $documentation);
         }
+    }
+
+    public function test_documentation_url_supports_safe_templates_and_rejects_unsafe_schemes(): void
+    {
+        config()->set('laravel-guard.documentation_url', 'https://security.example/rules/{RULE}');
+        $this->assertSame('https://security.example/rules/LG-TEST-001', RuleReference::documentationUrl('LG-TEST-001'));
+
+        config()->set('laravel-guard.documentation_url', 'javascript:alert(1)');
+        $this->assertSame(
+            'https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#lg-test-001',
+            RuleReference::documentationUrl('LG-TEST-001'),
+        );
     }
 }

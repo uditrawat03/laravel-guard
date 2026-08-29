@@ -4,6 +4,7 @@ namespace LaravelGuard\Core\Reporting;
 
 use LaravelGuard\Core\Findings\FindingCollection;
 use LaravelGuard\Core\Findings\Severity;
+use LaravelGuard\Core\Rules\RuleReference;
 use LaravelGuard\Core\Support\OutputSchema;
 
 final class SarifReporter
@@ -13,7 +14,7 @@ final class SarifReporter
         $rules = [];
         $results = [];
         foreach ($findings as $finding) {
-            $rules[$finding->ruleId] = ['id' => $finding->ruleId, 'name' => $finding->title, 'shortDescription' => ['text' => $finding->description], 'help' => ['text' => $finding->recommendation]];
+            $rules[$finding->ruleId] = ['id' => $finding->ruleId, 'name' => $finding->title, 'shortDescription' => ['text' => $finding->description], 'help' => ['text' => $finding->recommendation], 'helpUri' => RuleReference::documentationUrl($finding->ruleId)];
             $result = ['ruleId' => $finding->ruleId, 'level' => $this->level($finding->severity), 'message' => ['text' => $finding->description], 'fingerprints' => ['laravelGuard/v1' => $finding->fingerprint()]];
             if ($finding->location->file) {
                 $result['locations'] = [['physicalLocation' => ['artifactLocation' => ['uri' => str_replace('\\', '/', $finding->location->file)], 'region' => ['startLine' => $finding->location->line ?? 1]]]];

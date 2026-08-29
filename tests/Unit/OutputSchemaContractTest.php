@@ -25,6 +25,7 @@ final class OutputSchemaContractTest extends TestCase
         $this->assertSame(OutputSchema::REPORT_VERSION, $report['schema_version']);
         $this->assertSame(1, $report['total']);
         $this->assertArrayHasKey('findings', $report);
+        $this->assertSame('https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#lg-test-001', $report['findings'][0]['documentation_url']);
     }
 
     public function test_diff_and_baseline_have_independent_schema_versions(): void
@@ -45,6 +46,7 @@ final class OutputSchemaContractTest extends TestCase
 
         $this->assertSame('2.1.0', $sarif['version']);
         $this->assertSame(OutputSchema::REPORT_VERSION, $sarif['runs'][0]['properties']['laravelGuardSchemaVersion']);
+        $this->assertSame('https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#lg-test-001', $sarif['runs'][0]['tool']['driver']['rules'][0]['helpUri']);
         $this->assertStringContainsString('name="laravel-guard.schema-version" value="1"', $junit);
     }
 

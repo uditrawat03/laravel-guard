@@ -104,6 +104,8 @@ final class UiDashboardTest extends TestCase
 
         $this->assertSame('laravel-guard/ui-scan', $report['schema']);
         $this->assertArrayNotHasKey('metadata', $report['findings'][0]);
+        $this->assertStringStartsWith('https://', $report['findings'][0]['documentation_url']);
+        $this->get('/_guard/findings')->assertOk()->assertSee('Rule guidance');
         $this->assertStringNotContainsString(str_replace('\\', '/', base_path()), (string) file_get_contents($files[0]));
     }
 

@@ -36,6 +36,7 @@
       "properties": {
         "fingerprint": {"type": "string"},
         "rule_id": {"type": "string"},
+        "documentation_url": {"type": "string", "format": "uri", "pattern": "^https?://"},
         "category": {"type": "string"},
         "severity": {"enum": ["critical", "high", "medium", "low"]},
         "confidence": {"enum": ["high", "medium", "low"]},

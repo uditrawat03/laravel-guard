@@ -42,6 +42,8 @@ Use `--dev` for scanning in development and CI. Omit `--dev` when the applicatio
 
 Laravel Guard includes an optional, package-owned web interface for teams that need scan evidence outside the terminal. It presents the current security score, actionable findings, scan history, governed baselines, the installed rule catalog, runtime status, and `guard:doctor` diagnostics. The host application does not need dashboard controllers, models, migrations, Blade views, CSS, or a frontend build.
 
+Every serialized finding and SARIF rule includes a canonical HTTPS guidance link. Override the host for internal documentation with a top-level template such as `'documentation_url' => 'https://security.example/rules/{rule}'`; `{rule}` receives the lowercase rule ID and `{RULE}` receives the uppercase ID. Unsafe URL schemes fall back to the package rule catalog.
+
 The package automatically registers its dashboard routes during Laravel package discovery. In `local` and `testing`, authenticated users receive zero-setup access through a package-defined fallback Gate. Production remains fail closed and requires the consuming application to define the configured ability. Set `LARAVEL_GUARD_UI=false` to disable the dashboard and return HTTP 404. Configure it in `config/laravel-guard.php`:
 
 ```php

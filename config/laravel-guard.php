@@ -37,6 +37,7 @@ return [
         'owner' => env('LARAVEL_GUARD_BASELINE_OWNER'),
     ],
     'cache' => ['enabled' => true],
+    'documentation_url' => env('LARAVEL_GUARD_DOCUMENTATION_URL', 'https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#{rule}'),
     'ui' => [
         'enabled' => env('LARAVEL_GUARD_UI', true),
         'path' => 'laravel-guard',

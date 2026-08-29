@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Added
 
+- Canonical, safely configurable rule-documentation URLs in serialized findings, SARIF `helpUri` output, persisted dashboard evidence, and GUI finding actions.
 - An opt-in, package-owned security dashboard with findings, scan history, baselines, rule catalog, runtime status, and configuration diagnostics.
 - Fail-closed Gate authorization, a rate-limited browser scan action, redacted reports, private file-backed history, and retention controls.
 

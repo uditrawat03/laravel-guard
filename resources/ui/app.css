@@ -214,6 +214,8 @@ main {
 .guard-finding dl div { border: 1px solid var(--line-soft); border-radius: 4px; background: var(--surface-soft); padding: 11px; }
 .guard-finding dt { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .guard-finding dd { margin: 4px 0 0; }
+.guard-guidance { display: inline-flex; margin-top: 14px; color: var(--brand); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.guard-guidance:hover { color: #a8201a; }
 
 .guard-badge, .guard-status {
     display: inline-flex;

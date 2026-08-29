@@ -4,6 +4,7 @@ namespace LaravelGuard\Core\Findings;
 
 use JsonSerializable;
 use LaravelGuard\Core\Contracts\GuardRule;
+use LaravelGuard\Core\Rules\RuleReference;
 use LaravelGuard\Core\Support\SourceLocation;
 
 final readonly class SecurityFinding implements JsonSerializable
@@ -52,6 +53,7 @@ final readonly class SecurityFinding implements JsonSerializable
         return [
             'fingerprint' => $this->fingerprint(),
             'rule_id' => $this->ruleId,
+            'documentation_url' => RuleReference::documentationUrl($this->ruleId),
             'category' => $this->category,
             'severity' => strtolower($this->severity->name),
             'confidence' => $this->confidence->value,
