@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Added
 
+- Mutation-focused boundary coverage for security scoring, finding identity, collection thresholds, serialization, and fingerprint filtering, with the enforced MSI floor raised from 43% to 45% after a full hosted run.
+
 - A long-running worker benchmark that flushes Laravel scopes, detects retained event state, enforces memory-growth budgets, and emits the runtime-performance v2 contract.
 
 - Canonical, safely configurable rule-documentation URLs in serialized findings, SARIF `helpUri` output, persisted dashboard evidence, and GUI finding actions.

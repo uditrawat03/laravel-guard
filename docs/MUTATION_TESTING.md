@@ -4,17 +4,17 @@ Laravel Guard uses Infection to check whether its tests detect intentional chang
 
 ## Current budget
 
-The full `src` catalog is tested with Infection 0.35 on PHP 8.3. The first baseline generated 2,204 mutations:
+The full `src` catalog is tested with Infection 0.35 on PHP 8.3. The latest hosted hardening run generated 2,811 mutations:
 
 | Result | Count |
 |---|---:|
-| Killed by tests | 951 |
+| Killed by tests | 1,265 |
 | Errored | 1 |
-| Escaped | 1,252 |
+| Escaped | 1,545 |
 | Timed out | 0 |
 | Not covered | 0 |
 
-MSI and covered MSI were both 43.19%. `infection.json5` enforces a 43% floor for both metrics so the existing score cannot regress silently. This is a baseline, not a quality target. Before v1, the package aims for at least 70% MSI and 80% covered MSI, with security-relevant survivors either killed by tests or documented as equivalent/unproductive mutations.
+MSI and covered MSI are both 45.04%, up from the original 43.19% baseline across a smaller 2,204-mutant catalog. `infection.json5` enforces a 45% floor for both metrics so the measured improvement cannot regress silently. The first hardening slice added boundary coverage for security scoring, finding identity, serialization, collection thresholds, and fingerprint filtering. This is a milestone, not the quality target. Before v1, the package still aims for at least 70% MSI and 80% covered MSI, with security-relevant survivors either killed by tests or documented as equivalent or unproductive mutations.
 
 ## Running locally
 
@@ -47,4 +47,4 @@ Use the detailed and per-mutator reports to prioritize security-critical behavio
 - **Covered MSI** applies the same calculation to mutations reached by the test suite.
 - **Mutation code coverage** indicates whether tests execute mutated code; it does not show whether assertions reject the mutation.
 
-The baseline has 100% mutation code coverage but only 43.19% MSI. The surviving mutants remain a documented quality backlog until equivalent or stronger tests kill them.
+The latest run retains 100% mutation code coverage and improves MSI to 45.04%. The surviving mutants remain a documented quality backlog until equivalent or stronger tests kill them.

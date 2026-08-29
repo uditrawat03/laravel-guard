@@ -11,6 +11,6 @@
         "summaryJson": "build/infection-summary.json",
         "perMutator": "build/infection-per-mutator.md"
     },
-    "minMsi": 43,
-    "minCoveredMsi": 43
+    "minMsi": 45,
+    "minCoveredMsi": 45
 }
