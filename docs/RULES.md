@@ -1,6 +1,6 @@
 # Rule reference
 
-This reference lists every built-in static rule. Run `php artisan guard:explain LG-...` for module-specific impact, response guidance, and analysis limitations.
+This reference lists every built-in static rule. Run `php artisan guard:explain LG-...` for module-specific impact, response guidance, analysis limitations, and structured vulnerable/safer code examples. The package-owned dashboard exposes the same guidance from each expandable rule row.
 
 Severity is the default rating. A finding must still be reviewed in the context of the application. Suppress only a demonstrated false positive with a narrow scope and documented reason.
 

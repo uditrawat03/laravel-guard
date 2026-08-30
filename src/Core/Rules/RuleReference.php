@@ -68,6 +68,7 @@ final class RuleReference
             'why_it_matters' => $guidance['why'],
             'how_to_respond' => $guidance['respond'],
             'analysis_limits' => $guidance['limits'],
+            'example' => RuleExampleCatalog::for($rule->id()),
             'documentation' => 'docs/RULES.md#'.strtolower($rule->id()),
             'documentation_url' => self::documentationUrl($rule->id()),
         ];

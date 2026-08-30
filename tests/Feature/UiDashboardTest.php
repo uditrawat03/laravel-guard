@@ -74,6 +74,9 @@ final class UiDashboardTest extends TestCase
             ->assertOk()
             ->assertSee('class="guard-pagination"', false)
             ->assertSee('active rules')
+            ->assertSee('View guidance')
+            ->assertSee('Potentially vulnerable')
+            ->assertSee('Safer pattern')
             ->assertDontSee('<svg', false);
     }
 

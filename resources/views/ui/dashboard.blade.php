@@ -58,7 +58,37 @@
             <section class="guard-summary"><div><span>Status</span><strong>{{ $baseline['exists'] ? 'Available' : 'Not created' }}</strong></div><div><span>Accepted findings</span><strong>{{ count($baseline['entries']) }}</strong></div><div><span>Expired</span><strong>{{ $baseline['expired'] }}</strong></div></section>
             <section class="guard-panel"><div class="guard-panel-head"><h2>Baseline entries</h2><code>{{ $baseline['path'] }}</code></div>@if(isset($baseline['error']))<p class="guard-error">{{ $baseline['error'] }}</p>@endif<div class="guard-list">@forelse($baseline['entries'] as $entry)<article class="guard-row"><span class="guard-badge {{ $entry['severity'] }}">{{ $entry['severity'] }}</span><div><strong>{{ $entry['title'] }}</strong><code>{{ $entry['rule_id'] }}</code><p>{{ $entry['acceptance']['reason'] ?? 'No acceptance reason recorded.' }}</p></div></article>@empty<p class="guard-empty">No baseline entries.</p>@endforelse</div></section>
         @elseif($section === 'rules')
-            <section class="guard-panel guard-table-panel"><div class="guard-table-meta"><strong>{{ $rules->total() }} active rules</strong><span>Installed package catalog</span></div><div class="guard-table-wrap"><table><thead><tr><th>Rule</th><th>Category</th><th>Severity</th><th>Description</th></tr></thead><tbody>@foreach($rules as $rule)<tr><td><strong>{{ $rule['name'] }}</strong><br><code>{{ $rule['id'] }}</code></td><td><span class="guard-category">{{ $rule['category'] }}</span></td><td><span class="guard-badge {{ $rule['severity'] }}">{{ $rule['severity'] }}</span></td><td class="guard-description">{{ $rule['description'] }}</td></tr>@endforeach</tbody></table></div>@include('laravel-guard::ui.partials.pagination', ['paginator' => $rules])</section>
+            <section class="guard-panel guard-rule-panel">
+                <div class="guard-table-meta"><strong>{{ $rules->total() }} active rules</strong><span>Open a rule for impact, remediation, and code examples</span></div>
+                <div class="guard-rule-list">
+                    @foreach($rules as $rule)
+                        <article class="guard-rule">
+                            <div class="guard-rule-row">
+                                <div class="guard-rule-identity"><strong>{{ $rule['name'] }}</strong><code>{{ $rule['id'] }}</code></div>
+                                <span class="guard-category">{{ $rule['category'] }}</span>
+                                <span class="guard-badge {{ $rule['severity'] }}">{{ $rule['severity'] }}</span>
+                                <p>{{ $rule['description'] }}</p>
+                                <details>
+                                    <summary>View guidance</summary>
+                                    <div class="guard-rule-guidance">
+                                        <dl>
+                                            <div><dt>Why it matters</dt><dd>{{ $rule['why_it_matters'] }}</dd></div>
+                                            <div><dt>Recommended response</dt><dd>{{ $rule['how_to_respond'] }}</dd></div>
+                                            <div><dt>Analysis limits</dt><dd>{{ $rule['analysis_limits'] }}</dd></div>
+                                        </dl>
+                                        <div class="guard-code-grid">
+                                            <div><span>Potentially vulnerable</span><pre><code>{{ $rule['example']['vulnerable'] }}</code></pre></div>
+                                            <div><span>Safer pattern</span><pre><code>{{ $rule['example']['safer'] }}</code></pre></div>
+                                        </div>
+                                        <a class="guard-guidance" href="{{ $rule['documentation_url'] }}" target="_blank" rel="noopener noreferrer">Full rule documentation</a>
+                                    </div>
+                                </details>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+                @include('laravel-guard::ui.partials.pagination', ['paginator' => $rules])
+            </section>
         @elseif($section === 'runtime')
             <section class="guard-summary"><div><span>Runtime guard</span><strong>{{ $runtime['enabled'] ? 'Enabled' : 'Disabled' }}</strong></div><div><span>Current request events</span><strong>{{ count($runtime['events']) }}</strong></div><div><span>Environments</span><strong>{{ implode(', ', $runtime['environments']) ?: 'None' }}</strong></div></section>
             <section class="guard-panel"><div class="guard-list">@forelse($runtime['events'] as $event)<article class="guard-row"><code>{{ $event['rule_id'] }}</code><div><strong>{{ $event['message'] }}</strong><p>{{ $event['file'] }}{{ $event['line'] ? ':'.$event['line'] : '' }} | {{ $event['created_at'] }}</p></div></article>@empty<p class="guard-empty">No runtime events were collected during this request.</p>@endforelse</div></section>

@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Added
 
+- Structured vulnerable and safer examples for every built-in static rule, shared by `guard:explain` JSON/console output and the package-owned rule catalog.
+
 - Draft 2020-12 conformance tests for every packaged output schema, executed through the Laravel 10-13 highest/lowest dependency compatibility matrix.
 
 - Mutation-focused boundary coverage for security scoring, finding identity, collection thresholds, serialization, and fingerprint filtering, with the enforced MSI floor raised from 43% to 45% after a full hosted run.

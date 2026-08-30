@@ -6,6 +6,7 @@ use Composer\InstalledVersions;
 use Illuminate\Contracts\Config\Repository;
 use LaravelGuard\Core\Baseline\BaselineDocument;
 use LaravelGuard\Core\Diagnostics\ConfigurationDoctor;
+use LaravelGuard\Core\Rules\RuleReference;
 use LaravelGuard\Core\Rules\RuleRegistry;
 use LaravelGuard\Core\Scoring\SecurityScore;
 use LaravelGuard\LaravelGuard;
@@ -62,13 +63,22 @@ final readonly class SecurityDashboard
 
     public function rules(): array
     {
-        return array_map(fn ($rule) => [
-            'id' => $rule->id(),
-            'name' => $rule->name(),
-            'description' => $rule->description(),
-            'category' => $rule->category(),
-            'severity' => strtolower($rule->severity()->name),
-        ], $this->rules->all());
+        return array_map(function ($rule): array {
+            $reference = RuleReference::for($rule);
+
+            return [
+                'id' => $reference['rule_id'],
+                'name' => $reference['name'],
+                'description' => $reference['description'],
+                'category' => $reference['category'],
+                'severity' => $reference['default_severity'],
+                'why_it_matters' => $reference['why_it_matters'],
+                'how_to_respond' => $reference['how_to_respond'],
+                'analysis_limits' => $reference['analysis_limits'],
+                'example' => $reference['example'],
+                'documentation_url' => $reference['documentation_url'],
+            ];
+        }, $this->rules->all());
     }
 
     public function baseline(): array

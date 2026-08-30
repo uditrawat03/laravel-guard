@@ -40,7 +40,7 @@ Use `--dev` for scanning in development and CI. Omit `--dev` when the applicatio
 
 ## Security Dashboard
 
-Laravel Guard includes an optional, package-owned web interface for teams that need scan evidence outside the terminal. It presents the current security score, actionable findings, scan history, governed baselines, the installed rule catalog, runtime status, and `guard:doctor` diagnostics. The host application does not need dashboard controllers, models, migrations, Blade views, CSS, or a frontend build.
+Laravel Guard includes an optional, package-owned web interface for teams that need scan evidence outside the terminal. It presents the current security score, actionable findings, scan history, governed baselines, an expandable rule catalog with vulnerable and safer code examples, runtime status, and `guard:doctor` diagnostics. This gives developers both the missing control and a concrete correction pattern without maintaining dashboard code in the host application. The host application does not need dashboard controllers, models, migrations, Blade views, CSS, or a frontend build.
 
 Every serialized finding and SARIF rule includes a canonical HTTPS guidance link. Override the host for internal documentation with a top-level template such as `'documentation_url' => 'https://security.example/rules/{rule}'`; `{rule}` receives the lowercase rule ID and `{RULE}` receives the uppercase ID. Unsafe URL schemes fall back to the package rule catalog.
 
@@ -102,7 +102,7 @@ php artisan guard:benchmark-runtime worker --runs=10 --operations=1000 --max-mem
 
 `guard:doctor` validates scan paths, severities, modules, tenancy, policy models, suppression structure, custom rules, reporters, optional integrations, Git capability, runtime MIME support, baseline governance, runtime environments, and an optional report output destination. Errors return a failing exit code; `--strict` also fails for warnings. See [Configuration diagnostics](docs/DIAGNOSTICS.md) for the full check catalog.
 
-`guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor.
+`guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor. Every built-in static rule also includes a potentially vulnerable example and a safer alternative; use `--format=json` to consume the same structured guidance in internal tooling.
 
 `guard:benchmark` separates the first cold scan from warm average/P95 measurements, accepts repeatable `--path` overrides, and records peak memory. `guard:benchmark-runtime` measures tenant-query, upload-middleware, and long-running worker scope behavior in microseconds per operation, including retained-memory growth and state-leak detection. Both commands accept failing CI ceilings and emit versioned JSON. See [performance budgets](docs/PERFORMANCE.md).
 

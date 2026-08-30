@@ -402,3 +402,46 @@ main > .guard-notice {
     .guard-diagnostic { grid-template-columns: 90px minmax(0, 1fr); gap: 8px 14px; }
     .guard-diagnostic-detail { grid-column: 1 / -1; }
 }
+/* Expandable rule guidance keeps the catalog dense until detail is requested. */
+.guard-rule-panel { padding: 0; }
+.guard-rule-list { display: grid; }
+.guard-rule { border-bottom: 1px solid var(--line-soft); }
+.guard-rule:last-child { border-bottom: 0; }
+.guard-rule-row {
+    min-height: 76px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: minmax(210px, 1.1fr) 110px 78px minmax(260px, 1.6fr) 116px;
+    align-items: center;
+    gap: 14px;
+}
+.guard-rule:hover { background: #fafbfb; }
+.guard-rule-identity { min-width: 0; display: grid; gap: 2px; }
+.guard-rule-identity strong { overflow-wrap: anywhere; }
+.guard-rule-identity code { color: var(--muted); }
+.guard-rule-row > p { margin: 0; color: var(--ink-soft); }
+.guard-rule-row details { position: relative; justify-self: end; }
+.guard-rule-row summary { color: var(--brand); cursor: pointer; font-size: 12px; font-weight: 750; list-style-position: inside; white-space: nowrap; }
+.guard-rule-row details[open] { grid-column: 1 / -1; width: 100%; }
+.guard-rule-row details[open] summary { margin: 8px 0 12px; }
+.guard-rule-guidance { border-top: 1px solid var(--line); padding: 16px 0 4px; }
+.guard-rule-guidance dl { margin: 0 0 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.guard-rule-guidance dl div { border-left: 2px solid var(--line); padding-left: 11px; }
+.guard-rule-guidance dt, .guard-code-grid span { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.guard-rule-guidance dd { margin: 4px 0 0; color: var(--ink-soft); }
+.guard-code-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.guard-code-grid > div { min-width: 0; }
+.guard-code-grid pre { min-height: 84px; margin: 5px 0 0; border: 1px solid var(--line); border-radius: 4px; background: #f4f6f7; padding: 11px; overflow: auto; white-space: pre-wrap; }
+.guard-code-grid code { color: #263944; overflow-wrap: normal; }
+
+@media (max-width: 1100px) {
+    .guard-rule-row { grid-template-columns: minmax(200px, 1fr) 100px 76px minmax(220px, 1.4fr); }
+    .guard-rule-row details { grid-column: 1 / -1; justify-self: start; }
+}
+
+@media (max-width: 760px) {
+    .guard-rule-row { grid-template-columns: minmax(0, 1fr) auto auto; }
+    .guard-rule-row > p { grid-column: 1 / -1; }
+    .guard-rule-row details { grid-column: 1 / -1; justify-self: start; }
+    .guard-rule-guidance dl, .guard-code-grid { grid-template-columns: 1fr; }
+}

@@ -16,6 +16,10 @@ final class RuleReferenceTest extends TestCase
             $reference = RuleReference::for($rule);
             $this->assertNotSame('', $reference['why_it_matters']);
             $this->assertNotSame('', $reference['how_to_respond']);
+            $this->assertNotSame('', $reference['example']['language']);
+            $this->assertNotSame('', $reference['example']['vulnerable']);
+            $this->assertNotSame('', $reference['example']['safer']);
+            $this->assertNotSame('text', $reference['example']['language']);
             $this->assertSame('https://github.com/uditrawat03/laravel-guard/blob/main/docs/RULES.md#'.strtolower($rule->id()), $reference['documentation_url']);
             $this->assertStringContainsString('id="'.strtolower($rule->id()).'"', $documentation);
         }

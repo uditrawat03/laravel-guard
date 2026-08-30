@@ -35,6 +35,18 @@ final class DiagnosticsCommandsTest extends TestCase
         $this->assertStringContainsString('why_it_matters', $output);
         $this->assertStringContainsString('how_to_respond', $output);
         $this->assertStringContainsString('analysis_limits', $output);
+        $this->assertStringContainsString('Cross-tenant model access', $output);
+        $this->assertStringContainsString('Patient::findOrFail', $output);
+        $this->assertStringContainsString("where('tenant_id'", $output);
+    }
+
+    public function test_explain_console_renders_code_examples(): void
+    {
+        $this->artisan('guard:explain', ['rule' => 'LG-QUERY-001'])
+            ->expectsOutputToContain('Potentially vulnerable')
+            ->expectsOutputToContain('DB::select')
+            ->expectsOutputToContain('Safer pattern')
+            ->assertSuccessful();
     }
 
     public function test_explain_fails_for_an_unknown_rule(): void

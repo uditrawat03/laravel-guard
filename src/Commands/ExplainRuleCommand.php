@@ -46,6 +46,14 @@ final class ExplainRuleCommand extends Command
             ['Documentation', $reference['documentation']],
         ]);
 
+        $this->newLine();
+        $this->components->twoColumnDetail('Example language', $reference['example']['language']);
+        $this->components->info('Potentially vulnerable');
+        $this->line($reference['example']['vulnerable']);
+        $this->newLine();
+        $this->components->info('Safer pattern');
+        $this->line($reference['example']['safer']);
+
         return self::SUCCESS;
     }
 }
