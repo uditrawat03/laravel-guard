@@ -28,8 +28,7 @@ final class DiagnosticsCommandsTest extends TestCase
 
     public function test_doctor_can_run_explicit_connectivity_probes(): void
     {
-        $this->app['config']->set('cache.default', 'array');
-        $this->app['config']->set('queue.default', 'sync');
+        $this->bindPassingConnectivityServices();
 
         $this->artisan('guard:doctor', ['--connectivity' => true])
             ->expectsOutputToContain('Database connectivity probe passed')
@@ -37,6 +36,29 @@ final class DiagnosticsCommandsTest extends TestCase
             ->expectsOutputToContain('Queue connectivity probe passed')
             ->expectsOutputToContain('Filesystem connectivity probe passed')
             ->assertSuccessful();
+    }
+
+    public function test_doctor_redacts_connectivity_failure_details(): void
+    {
+        $this->bindPassingConnectivityServices();
+        $this->app->instance('db', new class
+        {
+            public function connection(): object
+            {
+                return new class
+                {
+                    public function getPdo(): never
+                    {
+                        throw new \RuntimeException('secret database endpoint');
+                    }
+                };
+            }
+        });
+
+        $this->assertSame(1, Artisan::call('guard:doctor', ['--connectivity' => true]));
+        $output = Artisan::output();
+        $this->assertStringContainsString('Database connectivity probe failed (RuntimeException)', $output);
+        $this->assertStringNotContainsString('secret database endpoint', $output);
     }
 
     public function test_doctor_rejects_an_unknown_default_driver(): void
@@ -91,5 +113,82 @@ final class DiagnosticsCommandsTest extends TestCase
         $this->artisan('guard:explain', ['rule' => 'LG-NOT-REAL'])
             ->expectsOutputToContain('Unknown Laravel Guard rule')
             ->assertFailed();
+    }
+
+    private function bindPassingConnectivityServices(): void
+    {
+        $this->app->instance('db', new class
+        {
+            public function connection(): object
+            {
+                return new class
+                {
+                    public function getPdo(): object
+                    {
+                        return new \stdClass;
+                    }
+                };
+            }
+        });
+        $this->app->instance('cache', new class
+        {
+            public function store(): object
+            {
+                return new class
+                {
+                    private array $values = [];
+
+                    public function put(string $key, mixed $value, int $seconds): bool
+                    {
+                        $this->values[$key] = $value;
+
+                        return true;
+                    }
+
+                    public function get(string $key): mixed
+                    {
+                        return $this->values[$key] ?? null;
+                    }
+
+                    public function forget(string $key): bool
+                    {
+                        unset($this->values[$key]);
+
+                        return true;
+                    }
+                };
+            }
+        });
+        $this->app->instance('queue', new class
+        {
+            public function connection(): object
+            {
+                return new class
+                {
+                    public function size(): int
+                    {
+                        return 0;
+                    }
+                };
+            }
+        });
+        $this->app->instance('filesystem', new class
+        {
+            public function disk(): object
+            {
+                return new class
+                {
+                    public function put(string $path, string $contents): bool
+                    {
+                        return true;
+                    }
+
+                    public function delete(string $path): bool
+                    {
+                        return true;
+                    }
+                };
+            }
+        });
     }
 }
