@@ -41,15 +41,15 @@ final class DiagnosticsCommandsTest extends TestCase
     public function test_doctor_redacts_connectivity_failure_details(): void
     {
         $this->bindPassingConnectivityServices();
-        $this->app->instance('db', new class
+        $this->app->instance('cache', new class
         {
-            public function connection(): object
+            public function store(): object
             {
                 return new class
                 {
-                    public function getPdo(): never
+                    public function put(string $key, mixed $value, int $seconds): never
                     {
-                        throw new \RuntimeException('secret database endpoint');
+                        throw new \RuntimeException('secret cache endpoint');
                     }
                 };
             }
@@ -57,8 +57,8 @@ final class DiagnosticsCommandsTest extends TestCase
 
         $this->assertSame(1, Artisan::call('guard:doctor', ['--connectivity' => true]));
         $output = Artisan::output();
-        $this->assertStringContainsString('Database connectivity probe failed (RuntimeException)', $output);
-        $this->assertStringNotContainsString('secret database endpoint', $output);
+        $this->assertStringContainsString('Cache connectivity probe failed (RuntimeException)', $output);
+        $this->assertStringNotContainsString('secret cache endpoint', $output);
     }
 
     public function test_doctor_rejects_an_unknown_default_driver(): void
@@ -117,19 +117,11 @@ final class DiagnosticsCommandsTest extends TestCase
 
     private function bindPassingConnectivityServices(): void
     {
-        $this->app->instance('db', new class
-        {
-            public function connection(): object
-            {
-                return new class
-                {
-                    public function getPdo(): object
-                    {
-                        return new \stdClass;
-                    }
-                };
-            }
-        });
+        $this->app['config']->set('database.default', 'sqlite');
+        $this->app['config']->set('database.connections.sqlite', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+        ]);
         $this->app->instance('cache', new class
         {
             public function store(): object
