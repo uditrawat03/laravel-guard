@@ -30,12 +30,13 @@ final class DiagnosticsCommandsTest extends TestCase
     {
         $this->bindPassingConnectivityServices();
 
-        $this->artisan('guard:doctor', ['--connectivity' => true])
-            ->expectsOutputToContain('Database connectivity probe passed')
-            ->expectsOutputToContain('Cache connectivity probe passed')
-            ->expectsOutputToContain('Queue connectivity probe passed')
-            ->expectsOutputToContain('Filesystem connectivity probe passed')
-            ->assertSuccessful();
+        $status = Artisan::call('guard:doctor', ['--connectivity' => true]);
+        $output = Artisan::output();
+        $this->assertSame(0, $status, $output);
+        $this->assertStringContainsString('Database connectivity probe passed', $output);
+        $this->assertStringContainsString('Cache connectivity probe passed', $output);
+        $this->assertStringContainsString('Queue connectivity probe passed', $output);
+        $this->assertStringContainsString('Filesystem connectivity probe passed', $output);
     }
 
     public function test_doctor_redacts_connectivity_failure_details(): void

@@ -115,7 +115,7 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-          extensions: fileinfo
+          extensions: fileinfo, pdo_sqlite
       - run: composer require --dev "orchestra/testbench:^11.0" --no-update
       - run: composer update --prefer-dist --no-interaction
       - run: composer audit --locked
