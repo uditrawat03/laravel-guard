@@ -56,6 +56,7 @@ final class OutputSchemaContractTest extends TestCase
             'report-v1.json' => 'urn:laravel-guard:schema:report:1',
             'diff-v1.json' => 'urn:laravel-guard:schema:diff:1',
             'baseline-v3.json' => 'urn:laravel-guard:schema:baseline:3',
+            'baseline-v4.json' => 'urn:laravel-guard:schema:baseline:4',
             'performance-v1.json' => 'urn:laravel-guard:schema:performance:1',
             'runtime-performance-v1.json' => 'urn:laravel-guard:schema:runtime-performance:1',
             'runtime-performance-v2.json' => 'urn:laravel-guard:schema:runtime-performance:2',

@@ -15,6 +15,39 @@ final class DiagnosticsCommandsTest extends TestCase
             ->assertSuccessful();
     }
 
+    public function test_doctor_validates_operational_drivers_and_runtime_paths(): void
+    {
+        $this->artisan('guard:doctor')
+            ->expectsOutputToContain('Database driver')
+            ->expectsOutputToContain('Cache driver')
+            ->expectsOutputToContain('Queue driver')
+            ->expectsOutputToContain('Filesystem driver')
+            ->expectsOutputToContain('Scoped runtime state is registered')
+            ->assertSuccessful();
+    }
+
+    public function test_doctor_can_run_explicit_connectivity_probes(): void
+    {
+        $this->app['config']->set('cache.default', 'array');
+        $this->app['config']->set('queue.default', 'sync');
+
+        $this->artisan('guard:doctor', ['--connectivity' => true])
+            ->expectsOutputToContain('Database connectivity probe passed')
+            ->expectsOutputToContain('Cache connectivity probe passed')
+            ->expectsOutputToContain('Queue connectivity probe passed')
+            ->expectsOutputToContain('Filesystem connectivity probe passed')
+            ->assertSuccessful();
+    }
+
+    public function test_doctor_rejects_an_unknown_default_driver(): void
+    {
+        $this->app['config']->set('queue.default', 'missing-queue');
+
+        $this->artisan('guard:doctor')
+            ->expectsOutputToContain('Queue driver [missing-queue] is not configured')
+            ->assertFailed();
+    }
+
     public function test_doctor_reports_invalid_severity_and_path_configuration(): void
     {
         $this->app['config']->set('laravel-guard.minimum_severity', 'urgent');
@@ -38,6 +71,9 @@ final class DiagnosticsCommandsTest extends TestCase
         $this->assertStringContainsString('Cross-tenant model access', $output);
         $this->assertStringContainsString('Patient::findOrFail', $output);
         $this->assertStringContainsString("where('tenant_id'", $output);
+        $this->assertStringContainsString('framework_versions', $output);
+        $this->assertStringContainsString('false_positive_review', $output);
+        $this->assertStringContainsString('suppression', $output);
     }
 
     public function test_explain_console_renders_code_examples(): void
@@ -46,6 +82,7 @@ final class DiagnosticsCommandsTest extends TestCase
             ->expectsOutputToContain('Potentially vulnerable')
             ->expectsOutputToContain('DB::select')
             ->expectsOutputToContain('Safer pattern')
+            ->expectsOutputToContain('Narrow suppression example')
             ->assertSuccessful();
     }
 

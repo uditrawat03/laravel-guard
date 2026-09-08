@@ -30,6 +30,34 @@ final class BaselineDoctorTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_doctor_rejects_invalid_policy_types(): void
+    {
+        $this->app['config']->set('laravel-guard.baseline_governance.allowed_severities', 'high');
+
+        $this->artisan('guard:doctor')
+            ->expectsOutputToContain('allowed_severities must be an array')
+            ->assertFailed();
+    }
+
+    public function test_doctor_rejects_a_baseline_that_violates_severity_policy(): void
+    {
+        $this->app['config']->set('laravel-guard.baseline_governance.allowed_severities', ['low']);
+        file_put_contents($this->baseline, json_encode([
+            'schema' => 'laravel-guard/baseline',
+            'schema_version' => 4,
+            'generated_at' => date(DATE_ATOM),
+            'fingerprints' => ['high-risk'],
+            'findings' => [[
+                'fingerprint' => 'high-risk', 'rule_id' => 'LG-TEST-001', 'severity' => 'high', 'title' => 'High risk',
+                'acceptance' => ['owner' => 'team', 'approvers' => [], 'reason' => 'reviewed', 'created_at' => date(DATE_ATOM), 'expires_at' => (new \DateTimeImmutable('+30 days'))->format(DATE_ATOM)],
+            ]],
+        ], JSON_THROW_ON_ERROR));
+
+        $this->artisan('guard:doctor')
+            ->expectsOutputToContain('disallowed severity')
+            ->assertFailed();
+    }
+
     public function test_doctor_rejects_malformed_baseline_json(): void
     {
         file_put_contents($this->baseline, '{not json');

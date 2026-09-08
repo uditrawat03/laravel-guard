@@ -18,17 +18,20 @@ final class DashboardController extends Controller
     public function show(Request $request, string $section = 'overview'): View
     {
         abort_unless(in_array($section, ['overview', 'findings', 'scans', 'baselines', 'rules', 'runtime', 'doctor'], true), 404);
-        $latest = $this->dashboard->latest();
+        $latest = in_array($section, ['overview', 'findings'], true) ? $this->dashboard->latest() : null;
+        $empty = $this->paginate([], $request, 'empty');
 
         return view('laravel-guard::ui.dashboard', [
             'section' => $section,
             'latest' => $latest,
-            'findings' => $this->paginate($this->filterFindings($latest['findings'] ?? [], $request), $request, 'findings'),
-            'scans' => $this->paginate($this->dashboard->history(), $request, 'scans'),
-            'baseline' => $this->dashboard->baseline(),
-            'rules' => $this->paginate($this->dashboard->rules(), $request, 'rules'),
-            'runtime' => $this->dashboard->runtime(),
-            'diagnostics' => $this->dashboard->diagnostics(),
+            'findings' => $section === 'findings'
+                ? $this->paginate($this->filterFindings($latest['findings'] ?? [], $request), $request, 'findings')
+                : $empty,
+            'scans' => $section === 'scans' ? $this->paginate($this->dashboard->history(), $request, 'scans') : $empty,
+            'baseline' => $section === 'baselines' ? $this->dashboard->baseline() : ['exists' => false, 'entries' => [], 'expired' => 0, 'path' => null],
+            'rules' => $section === 'rules' ? $this->paginate($this->dashboard->rules(), $request, 'rules') : $empty,
+            'runtime' => $section === 'runtime' ? $this->dashboard->runtime() : ['enabled' => false, 'environments' => [], 'events' => []],
+            'diagnostics' => $section === 'doctor' ? $this->dashboard->diagnostics() : [],
             'allowScan' => (bool) $this->config->get('laravel-guard.ui.allow_scan', false),
             'assetVersion' => substr(sha1_file($this->assetPath()), 0, 12),
             'packageVersion' => $this->dashboard->version(),

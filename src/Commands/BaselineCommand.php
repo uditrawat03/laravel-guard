@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use LaravelGuard\Core\Baseline\BaselineDocument;
 use LaravelGuard\Core\Baseline\BaselineEntry;
+use LaravelGuard\Core\Baseline\BaselinePolicy;
 use LaravelGuard\LaravelGuard;
 
 final class BaselineCommand extends Command
@@ -15,6 +16,7 @@ final class BaselineCommand extends Command
         {--force : Replace an existing baseline}
         {--reason= : Security acceptance reason}
         {--owner= : Person or team responsible for the accepted findings}
+        {--approver=* : Additional person or team approving the acceptance}
         {--expires= : Expiration date or relative date, such as +90 days}
         {--list : List baseline entries and their governance status}
         {--explain= : Explain entries matching a fingerprint or rule ID}
@@ -69,7 +71,21 @@ final class BaselineCommand extends Command
             return self::INVALID;
         }
 
-        $document = BaselineDocument::fromFindings($findings, $this->owner(), $reason, $expiresAt);
+        $document = BaselineDocument::fromFindings($findings, $this->owner(), $reason, $expiresAt, null, $this->approvers());
+        try {
+            $violations = BaselinePolicy::fromConfig((array) config('laravel-guard.baseline_governance', []))->violations($document);
+        } catch (\Throwable $error) {
+            $this->error('Baseline governance configuration is invalid: '.$error->getMessage());
+
+            return self::INVALID;
+        }
+        if ($violations !== []) {
+            foreach ($violations as $violation) {
+                $this->error($violation);
+            }
+
+            return self::INVALID;
+        }
         $this->write($files, $path, $document);
         $this->info("Saved {$findings->count()} governed finding(s) to {$path}.");
 
@@ -158,6 +174,15 @@ final class BaselineCommand extends Command
         return $this->cleanOption('owner')
             ?? config('laravel-guard.baseline_governance.owner')
             ?? getenv('GITHUB_ACTOR') ?: getenv('GITLAB_USER_LOGIN') ?: getenv('USERNAME') ?: getenv('USER') ?: get_current_user();
+    }
+
+    /** @return list<string> */
+    private function approvers(): array
+    {
+        return array_values(array_unique(array_filter(
+            (array) $this->option('approver'),
+            fn ($value) => is_string($value) && trim($value) !== '',
+        )));
     }
 
     private function expiration(): ?string

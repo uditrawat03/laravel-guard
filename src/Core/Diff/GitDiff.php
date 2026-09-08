@@ -11,19 +11,23 @@ final class GitDiff
 
     public static function fromRef(string $base, string $workingDirectory): self
     {
-        if (! preg_match('/^[A-Za-z0-9._\/-]+$/', $base)) {
-            throw new \InvalidArgumentException('The Git base contains unsupported characters.');
+        $mergeBase = GitRepository::mergeBase($base, $workingDirectory);
+        [$status, $output] = GitRepository::run([
+            'git', '-c', 'core.quotepath=false', '-C', $workingDirectory,
+            'diff', '--unified=0', '--no-color', '--find-renames', $mergeBase, '--', '.',
+        ]);
+        if ($status !== 0) {
+            throw new \RuntimeException(trim($output) ?: "Unable to diff against [{$base}].");
         }
-        $process = proc_open(['git', '-C', $workingDirectory, 'diff', '--unified=0', '--no-color', $base, '--'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-        if (! is_resource($process)) {
-            throw new \RuntimeException('Unable to start Git.');
-        }
-        $output = stream_get_contents($pipes[1]);
-        $error = stream_get_contents($pipes[2]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        if (proc_close($process) !== 0) {
-            throw new \RuntimeException(trim($error) ?: "Unable to diff against [{$base}].");
+
+        foreach (GitRepository::untrackedFiles($workingDirectory) as $relative) {
+            $absolute = rtrim($workingDirectory, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            if (! is_file($absolute) || ($contents = file_get_contents($absolute)) === false || str_contains($contents, "\0") || $contents === '') {
+                continue;
+            }
+            $lines = substr_count($contents, "\n") + (str_ends_with($contents, "\n") ? 0 : 1);
+            $path = str_replace('\\', '/', $relative);
+            $output .= "\n--- /dev/null\n+++ b/{$path}\n@@ -0,0 +1,{$lines} @@\n";
         }
 
         return new self($output);
@@ -35,6 +39,8 @@ final class GitDiff
         foreach (preg_split('/\R/', $diff) as $line) {
             if (str_starts_with($line, '+++ b/')) {
                 $file = substr($line, 6);
+            } elseif (str_starts_with($line, '+++ /dev/null')) {
+                $file = null;
             }
             if ($file && preg_match('/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/', $line, $matches)) {
                 $start = (int) $matches[1];

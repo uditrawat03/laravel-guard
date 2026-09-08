@@ -8,6 +8,7 @@ use LaravelGuard\Core\Findings\SecurityFinding;
 
 final readonly class BaselineEntry implements JsonSerializable
 {
+    /** @param list<string> $approvers */
     public function __construct(
         public string $fingerprint,
         public string $ruleId,
@@ -18,9 +19,11 @@ final readonly class BaselineEntry implements JsonSerializable
         public ?string $reason = null,
         public ?string $createdAt = null,
         public ?string $expiresAt = null,
+        public array $approvers = [],
     ) {}
 
-    public static function fromFinding(SecurityFinding $finding, ?string $owner, ?string $reason, string $createdAt, ?string $expiresAt): self
+    /** @param list<string> $approvers */
+    public static function fromFinding(SecurityFinding $finding, ?string $owner, ?string $reason, string $createdAt, ?string $expiresAt, array $approvers = []): self
     {
         return new self(
             $finding->fingerprint(),
@@ -32,6 +35,7 @@ final readonly class BaselineEntry implements JsonSerializable
             $reason,
             $createdAt,
             $expiresAt,
+            $approvers,
         );
     }
 
@@ -54,6 +58,7 @@ final readonly class BaselineEntry implements JsonSerializable
             self::string($acceptance['reason'] ?? $data['reason'] ?? null),
             self::string($acceptance['created_at'] ?? $data['created_at'] ?? null),
             self::string($acceptance['expires_at'] ?? $data['expires_at'] ?? null),
+            self::strings($acceptance['approvers'] ?? $data['approvers'] ?? []),
         );
     }
 
@@ -83,6 +88,7 @@ final readonly class BaselineEntry implements JsonSerializable
                 'reason' => $this->reason,
                 'created_at' => $this->createdAt,
                 'expires_at' => $this->expiresAt,
+                'approvers' => $this->approvers,
             ],
         ];
     }
@@ -90,5 +96,15 @@ final readonly class BaselineEntry implements JsonSerializable
     private static function string(mixed $value): ?string
     {
         return is_string($value) && trim($value) !== '' ? $value : null;
+    }
+
+    /** @return list<string> */
+    private static function strings(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter($value, fn ($item) => is_string($item) && trim($item) !== '')));
     }
 }

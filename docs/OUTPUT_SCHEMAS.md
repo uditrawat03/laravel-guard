@@ -8,7 +8,7 @@ Laravel Guard versions each machine-readable contract independently. Consumers s
 |---|---|---:|---|
 | `guard:scan --format=json` and `guard:check --format=json` | `laravel-guard/report` | 1 | `resources/schemas/report-v1.json` |
 | `guard:diff --format=json` | `laravel-guard/diff` | 1 | `resources/schemas/diff-v1.json` |
-| `.laravel-guard-baseline.json` | `laravel-guard/baseline` | 3 | `resources/schemas/baseline-v3.json` |
+| `.laravel-guard-baseline.json` | `laravel-guard/baseline` | 4 | `resources/schemas/baseline-v4.json` |
 | `guard:benchmark --format=json` | `laravel-guard/performance` | 1 | `resources/schemas/performance-v1.json` |
 | `guard:benchmark-runtime --format=json` | `laravel-guard/runtime-performance` | 2 | `resources/schemas/runtime-performance-v2.json` |
 | SARIF | SARIF 2.1.0 | Laravel Guard report contract 1 | Official SARIF schema plus run properties |
@@ -31,7 +31,7 @@ A command returning successful JSON is not sufficient by itself: CI also require
 - Meaning or type changes require a new schema version.
 - New enum values may be added when Laravel Guard adds a severity, confidence, or status.
 - Readers should ignore unknown fields and reject unsupported major schema versions clearly.
-- Baseline schemas 1 and 2 remain readable. New baseline writes use schema 3.
+- Baseline schemas 1-3 remain readable. New baseline writes use schema 4, which adds an approver list to each acceptance.
 - Runtime-performance schema 1 remains packaged. Version 2 adds the `worker` scenario plus required `memory_growth_mb` and `state_leaks` metrics.
 - SARIF remains valid SARIF 2.1.0; the Laravel Guard property version covers package-specific conventions.
 

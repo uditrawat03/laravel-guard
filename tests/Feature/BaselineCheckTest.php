@@ -35,9 +35,20 @@ final class BaselineCheckTest extends TestCase
     public function test_active_acceptance_suppresses_findings(): void
     {
         $findings = $this->app->make(LaravelGuard::class)->scan('uploads')->all();
-        $this->writeBaseline($findings, '2099-01-01T00:00:00+00:00');
+        $this->writeBaseline($findings, (new \DateTimeImmutable('+30 days'))->format(DATE_ATOM));
 
         $this->artisan('guard:check', ['--module' => 'uploads', '--fail-on' => 'high'])->assertSuccessful();
+    }
+
+    public function test_policy_violations_fail_closed_and_do_not_suppress_findings(): void
+    {
+        $findings = $this->app->make(LaravelGuard::class)->scan('uploads')->all();
+        $this->writeBaseline($findings, (new \DateTimeImmutable('+30 days'))->format(DATE_ATOM));
+        $this->app['config']->set('laravel-guard.baseline_governance.allowed_severities', ['low']);
+
+        $this->artisan('guard:check', ['--module' => 'uploads', '--fail-on' => 'high'])
+            ->expectsOutputToContain('Baseline policy violations prevent findings from being suppressed')
+            ->assertFailed();
     }
 
     private function writeBaseline(array $findings, string $expiresAt): void

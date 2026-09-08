@@ -1,0 +1,110 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "$id":  "urn:laravel-guard:schema:baseline:4",
+    "title":  "Laravel Guard governed baseline v4",
+    "type":  "object",
+    "required":  [
+                     "schema",
+                     "schema_version",
+                     "generated_at",
+                     "fingerprints",
+                     "findings"
+                 ],
+    "properties":  {
+                       "schema":  {
+                                      "const":  "laravel-guard/baseline"
+                                  },
+                       "schema_version":  {
+                                              "const":  4
+                                          },
+                       "generated_at":  {
+                                            "type":  "string",
+                                            "format":  "date-time"
+                                        },
+                       "fingerprints":  {
+                                            "type":  "array",
+                                            "items":  {
+                                                          "type":  "string"
+                                                      }
+                                        },
+                       "findings":  {
+                                        "type":  "array",
+                                        "items":  {
+                                                      "type":  "object",
+                                                      "required":  [
+                                                                       "fingerprint",
+                                                                       "rule_id",
+                                                                       "severity",
+                                                                       "title",
+                                                                       "acceptance"
+                                                                   ],
+                                                      "properties":  {
+                                                                         "fingerprint":  {
+                                                                                             "type":  "string"
+                                                                                         },
+                                                                         "rule_id":  {
+                                                                                         "type":  "string"
+                                                                                     },
+                                                                         "severity":  {
+                                                                                          "type":  "string"
+                                                                                      },
+                                                                         "title":  {
+                                                                                       "type":  "string"
+                                                                                   },
+                                                                         "file":  {
+                                                                                      "type":  [
+                                                                                                   "string",
+                                                                                                   "null"
+                                                                                               ]
+                                                                                  },
+                                                                         "acceptance":  {
+                                                                                            "type":  "object",
+                                                                                            "required":  [
+                                                                                                             "owner",
+                                                                                                             "reason",
+                                                                                                             "created_at",
+                                                                                                             "expires_at",
+                                                                                                             "approvers"
+                                                                                                         ],
+                                                                                            "properties":  {
+                                                                                                               "owner":  {
+                                                                                                                             "type":  [
+                                                                                                                                          "string",
+                                                                                                                                          "null"
+                                                                                                                                      ]
+                                                                                                                         },
+                                                                                                               "reason":  {
+                                                                                                                              "type":  [
+                                                                                                                                           "string",
+                                                                                                                                           "null"
+                                                                                                                                       ]
+                                                                                                                          },
+                                                                                                               "created_at":  {
+                                                                                                                                  "type":  [
+                                                                                                                                               "string",
+                                                                                                                                               "null"
+                                                                                                                                           ],
+                                                                                                                                  "format":  "date-time"
+                                                                                                                              },
+                                                                                                               "expires_at":  {
+                                                                                                                                  "type":  [
+                                                                                                                                               "string",
+                                                                                                                                               "null"
+                                                                                                                                           ],
+                                                                                                                                  "format":  "date-time"
+                                                                                                                              },
+                                                                                                               "approvers":  {
+                                                                                                                                 "type":  "array",
+                                                                                                                                 "items":  {
+                                                                                                                                               "type":  "string",
+                                                                                                                                               "minLength":  1
+                                                                                                                                           },
+                                                                                                                                 "uniqueItems":  true
+                                                                                                                             }
+                                                                                                           }
+                                                                                        }
+                                                                     }
+                                                  }
+                                    }
+                   }
+}

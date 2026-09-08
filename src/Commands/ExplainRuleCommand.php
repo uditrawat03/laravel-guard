@@ -43,6 +43,8 @@ final class ExplainRuleCommand extends Command
             ['Why it matters', $reference['why_it_matters']],
             ['How to respond', $reference['how_to_respond']],
             ['Analysis limits', $reference['analysis_limits']],
+            ['Laravel versions', $reference['framework_versions']],
+            ['False-positive review', $reference['false_positive_review']],
             ['Documentation', $reference['documentation']],
         ]);
 
@@ -53,6 +55,10 @@ final class ExplainRuleCommand extends Command
         $this->newLine();
         $this->components->info('Safer pattern');
         $this->line($reference['example']['safer']);
+        $this->newLine();
+        $this->components->info('Narrow suppression example');
+        $this->line($reference['suppression']['attribute']);
+        $this->warn($reference['suppression']['warning']);
 
         return self::SUCCESS;
     }

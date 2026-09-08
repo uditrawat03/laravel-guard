@@ -6,11 +6,19 @@ All notable changes to this project are documented here. The project follows Sem
 
 ### Added
 
+- Package-owned Playwright and Axe browser validation on desktop and mobile across Laravel 10-13, covering every dashboard section, keyboard focus, responsive overflow, accessible form names, and color contrast.
+- Adversarial API route-boundary tests and a documented full-catalog mutation survivor audit.
+
 - Structured vulnerable and safer examples for every built-in static rule, shared by `guard:explain` JSON/console output and the package-owned rule catalog.
+- A versioned v1 extension API, framework-neutral conformance validator, duplicate rule-ID protection, and documented compatibility/deprecation policy.
+- Governed baseline schema v4 with additional approvers and fail-closed entry-count, TTL, approval-count, expiration, reason, and severity policies.
+- Laravel-version context, false-positive review steps, and narrow suppression recipes in every built-in static rule reference, CLI explanation, and dashboard entry.
+- Driver, writable-path, worker-state, and Git-history diagnostics plus explicit redacted database/cache/queue/filesystem connectivity probes.
+- Merge-base Git comparisons with rename detection, untracked source ranges, deleted-file handling, and divergent historical-baseline coverage.
 
 - Draft 2020-12 conformance tests for every packaged output schema, executed through the Laravel 10-13 highest/lowest dependency compatibility matrix.
 
-- Mutation-focused boundary coverage for security scoring, finding identity, collection thresholds, serialization, and fingerprint filtering, with the enforced MSI floor raised from 43% to 45% after a full hosted run.
+- Mutation-focused boundary coverage for security scoring, finding identity, collection thresholds, serialization, fingerprint filtering, rule matching, baseline governance, and API boundaries.
 
 - A long-running worker benchmark that flushes Laravel scopes, detects retained event state, enforces memory-growth budgets, and emits the runtime-performance v2 contract.
 
@@ -19,6 +27,9 @@ All notable changes to this project are documented here. The project follows Sem
 - Fail-closed Gate authorization, a rate-limited browser scan action, redacted reports, private file-backed history, and retention controls.
 
 ### Changed
+
+- Dashboard sections now load scan evidence, rules, diagnostics, baselines, runtime events, and history only when the active view needs them.
+- The Infection v1 release floor increased from 45% to 70%; the measured candidate score is 73.05% with 100% mutation code coverage.
 
 - Local and testing environments receive a secure authenticated-user fallback for the default dashboard Gate, while production remains fail closed until the consuming application defines the ability.
 - Refined the dashboard layout, navigation, tables, filters, responsive behavior, and information hierarchy.

@@ -14,12 +14,13 @@ final readonly class BaselineDocument implements JsonSerializable
     /** @param list<BaselineEntry> $entries */
     public function __construct(public array $entries, public string $generatedAt, public int $sourceSchema = self::SCHEMA_VERSION) {}
 
-    public static function fromFindings(FindingCollection $findings, ?string $owner, ?string $reason, ?string $expiresAt, ?string $createdAt = null): self
+    /** @param list<string> $approvers */
+    public static function fromFindings(FindingCollection $findings, ?string $owner, ?string $reason, ?string $expiresAt, ?string $createdAt = null, array $approvers = []): self
     {
         $createdAt ??= (new DateTimeImmutable)->format(DATE_ATOM);
 
         return new self(array_map(
-            fn ($finding) => BaselineEntry::fromFinding($finding, $owner, $reason, $createdAt, $expiresAt),
+            fn ($finding) => BaselineEntry::fromFinding($finding, $owner, $reason, $createdAt, $expiresAt, $approvers),
             $findings->all(),
         ), $createdAt);
     }

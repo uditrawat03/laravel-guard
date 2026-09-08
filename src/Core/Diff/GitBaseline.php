@@ -6,9 +6,7 @@ final class GitBaseline
 {
     public static function fromRef(string $base, string $workingDirectory, string $baselinePath): ?BaselineSnapshot
     {
-        if (! preg_match('/^[A-Za-z0-9._\/-]+$/', $base)) {
-            throw new \InvalidArgumentException('The Git base contains unsupported characters.');
-        }
+        $mergeBase = GitRepository::mergeBase($base, $workingDirectory);
         $root = rtrim(str_replace('\\', '/', realpath($workingDirectory) ?: $workingDirectory), '/');
         $parent = realpath(dirname($baselinePath));
         $path = $parent === false
@@ -22,7 +20,7 @@ final class GitBaseline
             throw new \InvalidArgumentException('The baseline must be inside the Git working directory.');
         }
         $relative = substr($path, strlen($root) + 1);
-        $process = proc_open(['git', '-C', $workingDirectory, 'show', "{$base}:{$relative}"], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        $process = proc_open(['git', '-C', $workingDirectory, 'show', "{$mergeBase}:{$relative}"], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
         if (! is_resource($process)) {
             throw new \RuntimeException('Unable to start Git.');
         }

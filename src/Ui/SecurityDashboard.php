@@ -75,6 +75,9 @@ final readonly class SecurityDashboard
                 'why_it_matters' => $reference['why_it_matters'],
                 'how_to_respond' => $reference['how_to_respond'],
                 'analysis_limits' => $reference['analysis_limits'],
+                'framework_versions' => $reference['framework_versions'],
+                'false_positive_review' => $reference['false_positive_review'],
+                'suppression' => $reference['suppression'],
                 'example' => $reference['example'],
                 'documentation_url' => $reference['documentation_url'],
             ];

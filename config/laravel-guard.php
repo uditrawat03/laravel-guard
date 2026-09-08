@@ -33,7 +33,12 @@ return [
     'baseline' => base_path('.laravel-guard-baseline.json'),
     'baseline_governance' => [
         'require_reason' => true,
+        'require_expiration' => true,
         'default_ttl_days' => 90,
+        'max_ttl_days' => 90,
+        'max_entries' => 500,
+        'required_approvals' => 1,
+        'allowed_severities' => ['low', 'medium', 'high', 'critical'],
         'owner' => env('LARAVEL_GUARD_BASELINE_OWNER'),
     ],
     'cache' => ['enabled' => true],

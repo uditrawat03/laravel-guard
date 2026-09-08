@@ -48,7 +48,7 @@
             @endif
         @elseif($section === 'findings')
             <section class="guard-panel">
-                <form class="guard-filters" method="get"><select name="severity"><option value="">All severities</option>@foreach(['critical','high','medium','low'] as $value)<option value="{{ $value }}" @selected(request('severity') === $value)>{{ ucfirst($value) }}</option>@endforeach</select><input name="category" value="{{ request('category') }}" placeholder="Category"><button type="submit">Filter</button></form>
+                <form class="guard-filters" method="get"><select name="severity" aria-label="Filter findings by severity"><option value="">All severities</option>@foreach(['critical','high','medium','low'] as $value)<option value="{{ $value }}" @selected(request('severity') === $value)>{{ ucfirst($value) }}</option>@endforeach</select><input name="category" aria-label="Filter findings by category" value="{{ request('category') }}" placeholder="Category"><button type="submit">Filter</button></form>
                 <div class="guard-list">@forelse($findings as $finding)<article class="guard-finding"><div class="guard-finding-head"><span class="guard-badge {{ $finding['severity'] }}">{{ $finding['severity'] }}</span><code>{{ $finding['rule_id'] }}</code></div><h2>{{ $finding['title'] }}</h2><p>{{ $finding['description'] }}</p><dl><div><dt>Risk</dt><dd>{{ $finding['risk'] }}</dd></div><div><dt>Recommended action</dt><dd>{{ $finding['recommendation'] }}</dd></div>@if($finding['file'])<div><dt>Location</dt><dd><code>{{ $finding['file'] }}{{ $finding['line'] ? ':'.$finding['line'] : '' }}</code></dd></div>@endif</dl>@if(!empty($finding['documentation_url']))<a class="guard-guidance" href="{{ $finding['documentation_url'] }}" target="_blank" rel="noopener noreferrer">Rule guidance</a>@endif</article>@empty<p class="guard-empty">No findings match this view.</p>@endforelse</div>
                 @include('laravel-guard::ui.partials.pagination', ['paginator' => $findings])
             </section>
@@ -75,10 +75,17 @@
                                             <div><dt>Why it matters</dt><dd>{{ $rule['why_it_matters'] }}</dd></div>
                                             <div><dt>Recommended response</dt><dd>{{ $rule['how_to_respond'] }}</dd></div>
                                             <div><dt>Analysis limits</dt><dd>{{ $rule['analysis_limits'] }}</dd></div>
+                                            <div><dt>Laravel versions</dt><dd>{{ $rule['framework_versions'] }}</dd></div>
+                                            <div><dt>False-positive review</dt><dd>{{ $rule['false_positive_review'] }}</dd></div>
                                         </dl>
                                         <div class="guard-code-grid">
                                             <div><span>Potentially vulnerable</span><pre><code>{{ $rule['example']['vulnerable'] }}</code></pre></div>
                                             <div><span>Safer pattern</span><pre><code>{{ $rule['example']['safer'] }}</code></pre></div>
+                                        </div>
+                                        <div class="guard-suppression">
+                                            <span>Narrow suppression</span>
+                                            <pre><code>{{ $rule['suppression']['attribute'] }}</code></pre>
+                                            <p>{{ $rule['suppression']['warning'] }}</p>
                                         </div>
                                         <a class="guard-guidance" href="{{ $rule['documentation_url'] }}" target="_blank" rel="noopener noreferrer">Full rule documentation</a>
                                     </div>

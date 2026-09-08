@@ -21,7 +21,7 @@ final class BaselineDocumentTest extends TestCase
         $this->assertSame(2, $document->sourceSchema);
         $this->assertSame(['legacy-fingerprint'], $document->activeFingerprints());
         $encoded = $document->jsonSerialize();
-        $this->assertSame(3, $encoded['schema_version']);
+        $this->assertSame(4, $encoded['schema_version']);
         $this->assertSame(['legacy-fingerprint'], $encoded['fingerprints']);
     }
 

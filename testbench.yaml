@@ -1,0 +1,16 @@
+laravel: '@testbench'
+
+providers:
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+workbench:
+  start: '/laravel-guard'
+  install: true
+  health: false
+  discovers:
+    web: false
+    api: false
+    commands: true
+    components: false
+    factories: false
+    views: false

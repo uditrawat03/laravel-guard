@@ -75,6 +75,8 @@ Gate::define('viewLaravelGuard', fn ($user) => $user->canManageSecurity());
 Clear cached configuration and visit `/laravel-guard` while authenticated. Set `LARAVEL_GUARD_UI_ALLOW_SCAN=true` only for trusted security operators who should be able to start a scan from the browser. The POST action is rate limited; all dashboard routes use the configured middleware and Gate ability.
 
 Scan history is stored as atomic, versioned JSON reports under the configured private storage path, with automatic retention cleanup. Browser reports omit finding metadata, redact the application root, and expose source locations only as application-relative paths. No package migration is required. For a production dashboard installation, install Laravel Guard without `--dev` so Composer deploys it with the application.
+
+Dashboard sections load their own data on demand, so opening the rule catalog does not also run Doctor diagnostics or read scan history. Package-owned Playwright coverage runs every route in desktop Chrome and a Pixel 7 viewport, checks keyboard operation and horizontal overflow, and rejects serious or critical Axe accessibility violations including color contrast.
 ## Commands
 
 ```bash
@@ -100,13 +102,13 @@ php artisan guard:benchmark-runtime upload --runs=10 --operations=500
 php artisan guard:benchmark-runtime worker --runs=10 --operations=1000 --max-memory-growth-mb=16
 ```
 
-`guard:doctor` validates scan paths, severities, modules, tenancy, policy models, suppression structure, custom rules, reporters, optional integrations, Git capability, runtime MIME support, baseline governance, runtime environments, and an optional report output destination. Errors return a failing exit code; `--strict` also fails for warnings. See [Configuration diagnostics](docs/DIAGNOSTICS.md) for the full check catalog.
+`guard:doctor` validates scan paths, severities, modules, tenancy, policy models, suppression structure, extensions, reporters, integrations, operational drivers, writable runtime paths, Git history, worker state, runtime MIME support, baseline policy, and an optional report destination. `--connectivity` explicitly probes database, cache, queue, and filesystem services while redacting exception details. Errors return a failing exit code; `--strict` also fails for warnings. See [Configuration diagnostics](docs/DIAGNOSTICS.md) for the full check catalog.
 
-`guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, and its stable documentation anchor. Every built-in static rule also includes a potentially vulnerable example and a safer alternative; use `--format=json` to consume the same structured guidance in internal tooling.
+`guard:explain` describes what a rule detects, why it matters, how to respond, known analysis limitations, supported Laravel-version context, false-positive review steps, and a narrow suppression recipe. Every built-in static rule also includes a potentially vulnerable example and a safer alternative; use `--format=json` to consume the same structured guidance in internal tooling.
 
 `guard:benchmark` separates the first cold scan from warm average/P95 measurements, accepts repeatable `--path` overrides, and records peak memory. `guard:benchmark-runtime` measures tenant-query, upload-middleware, and long-running worker scope behavior in microseconds per operation, including retained-memory growth and state-leak detection. Both commands accept failing CI ceilings and emit versioned JSON. See [performance budgets](docs/PERFORMANCE.md).
 
-`guard:check` exits with code 1 at the configured threshold. `guard:diff` compares the current scan with the baseline stored at a Git ref and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt. Governed baselines record an owner, acceptance reason, and expiration; expired entries automatically stop suppressing findings.
+`guard:check` exits with code 1 at the configured threshold. `guard:diff` compares against the merge base of the requested Git ref, includes untracked and renamed source files, and reports introduced and resolved findings. Baselines use normalized, symbol-aware fingerprints, so moving a finding to another line does not revive accepted debt. Governed baselines record an owner, additional approvers, acceptance reason, and expiration. Entry-count, TTL, approval-count, expiration, reason, and severity policies fail closed; expired or non-compliant entries do not suppress findings.
 
 See [Baseline governance](docs/BASELINES.md) for schema compatibility, maintenance commands, CI behavior, and configuration.
 Machine-readable outputs carry independent schema identities and versions. Real report, diff, baseline, scan-performance, and runtime-performance documents are validated against every packaged Draft 2020-12 schema by the Laravel 10-13 highest/lowest dependency CI matrix. See [Output schemas](docs/OUTPUT_SCHEMAS.md) for contract definitions and compatibility rules, and [Upgrading](docs/UPGRADING.md) for consumer migration notes.
@@ -203,7 +205,7 @@ Future upstream majors are treated as unverified until added to this matrix. See
 
 Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, `assertRouteUsesMiddleware()`, and `assertTenantSafe()`.
 
-Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. A weekly and manually dispatchable Infection 0.35 workflow mutation-tests the full `src` catalog, publishes survivor reports, and rejects MSI or covered MSI below the current 45% non-regression floor. The latest full-catalog run measured 45.04% (1,265 killed, 1 errored, and 1,545 escaped of 2,811 mutations), improving on the original 43.19% baseline while retaining 100% mutation code coverage and zero timeouts. Raising it toward 70% MSI and 80% covered MSI remains pre-v1 hardening work.
+Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. A weekly and manually dispatchable Infection 0.35 workflow mutation-tests the full `src` catalog, publishes survivor reports, and rejects MSI or covered MSI below the v1 floor of 70%. The v1 candidate run measured 73.05% for both scores (2,361 killed and 871 escaped of 3,232 mutations), with 100% mutation code coverage, zero errors, and zero timeouts. The survivor inventory and post-v1 80% objective are documented in [mutation-testing guidance](docs/MUTATION_TESTING.md).
 
 ```yaml
 - name: Laravel Guard configuration
@@ -216,7 +218,9 @@ The package includes focused regression, adversarial upload, and property-style 
 
 ## Extending Laravel Guard
 
-Implement `LaravelGuard\Core\Contracts\GuardRule` and list the class under `custom_rules`. Custom reporters implement `LaravelGuard\Core\Contracts\SecurityReporter` and are mapped by format name under `reporters`. Invalid custom rules are retained as Doctor diagnostics and prevent scans from running until corrected.
+Implement `LaravelGuard\Core\Contracts\GuardRule` and list the class under `custom_rules`. Custom reporters implement `LaravelGuard\Core\Contracts\SecurityReporter` and are mapped by format name under `reporters`. Invalid custom rules are retained as Doctor diagnostics and prevent scans from running until corrected. Duplicate rule IDs fail registration instead of silently replacing another package's rule.
+
+The stable v1 contracts, naming requirements, compatibility guarantees, deprecation policy, and framework-neutral conformance validator are documented in [Extension API](docs/EXTENSIONS.md). Extension packages can run `ExtensionConformance::assertRule()`, `assertReporter()`, and `assertIntegration()` in their own test suite.
 
 ## License
 

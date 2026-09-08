@@ -51,12 +51,62 @@ final class RuleReference
         ],
     ];
 
+    private const CONTEXT = [
+        'configuration' => [
+            'versions' => 'Laravel 10-13 configuration keys are recognized; infrastructure and proxy behavior can still vary by deployment platform.',
+            'false_positive' => 'Verify the effective production configuration after config:cache. Environment-only overrides and platform-managed TLS may make source defaults differ from deployed values.',
+        ],
+        'routes' => [
+            'versions' => 'Laravel 10-13 route middleware, controller authorization, Gate calls, policies, and signed routes are recognized.',
+            'false_positive' => 'Check route groups, inherited controller middleware, custom authorization wrappers, and upstream gateway controls before suppressing.',
+        ],
+        'uploads' => [
+            'versions' => 'Laravel 10-13 validation and Filesystem APIs are recognized. Runtime MIME inspection depends on PHP fileinfo.',
+            'false_positive' => 'Confirm validation occurs on every path and that any custom sanitizer or quarantine adapter runs before storage or serving.',
+        ],
+        'tenant' => [
+            'versions' => 'Laravel 10-13 Eloquent and query-builder patterns are recognized; supported tenancy adapters are tested in the optional-integration matrix.',
+            'false_positive' => 'Verify the tenant scope is applied by a model trait, global scope, repository boundary, or database policy and add a cross-tenant denial test.',
+        ],
+        'queries' => [
+            'versions' => 'Laravel 10-13 DB facade, query-builder, and Eloquent mutation patterns are recognized.',
+            'false_positive' => 'Trace every interpolated value to a fixed internal constant or validated allowlist; parameter binding elsewhere in a wrapper is not inferred automatically.',
+        ],
+        'models' => [
+            'versions' => 'Laravel 10-13 mass-assignment, model visibility, resources, and common serialization paths are recognized.',
+            'false_positive' => 'Confirm request validation narrows writable fields and inspect the final resource payload, including accessors, appends, casts, and nested relations.',
+        ],
+        'secrets' => [
+            'versions' => 'Framework-independent source and Git tracked-file checks run consistently across supported Laravel versions.',
+            'false_positive' => 'Confirm the value is a documented placeholder or test-only credential. Never suppress a live-looking credential without rotation and history review.',
+        ],
+        'api' => [
+            'versions' => 'Laravel 10-13 API routes and common Sanctum/Passport middleware names are recognized.',
+            'false_positive' => 'Confirm authentication, abilities, and throttling are applied through a route group, custom middleware, or an upstream gateway and cover them with an HTTP test.',
+        ],
+    ];
+
     public static function for(GuardRule $rule): array
     {
         $guidance = self::GUIDANCE[$rule->category()] ?? [
             'why' => 'The matched pattern may weaken an application security boundary.',
             'respond' => 'Review the finding in its application context and add a regression test for the intended control.',
             'limits' => 'Custom rule behavior is defined by the application or extension that registered it.',
+        ];
+
+        $context = self::CONTEXT[$rule->category()] ?? [
+            'versions' => 'Compatibility depends on the third-party extension and its supported Laravel versions.',
+            'false_positive' => 'Review the custom rule documentation and prove the intended control with a focused regression test.',
+        ];
+        $suppression = [
+            'attribute' => "#[GuardIgnore(rule: '{$rule->id()}', reason: 'Explain the verified control')]",
+            'configuration' => [
+                $rule->id() => [[
+                    'target' => '<exact file, symbol, route, or fingerprint>',
+                    'reason' => 'Explain the verified control and evidence.',
+                ]],
+            ],
+            'warning' => 'Prefer a fingerprint or exact symbol target. Never use a global suppression for a security boundary.',
         ];
 
         return [
@@ -68,6 +118,9 @@ final class RuleReference
             'why_it_matters' => $guidance['why'],
             'how_to_respond' => $guidance['respond'],
             'analysis_limits' => $guidance['limits'],
+            'framework_versions' => $context['versions'],
+            'false_positive_review' => $context['false_positive'],
+            'suppression' => $suppression,
             'example' => RuleExampleCatalog::for($rule->id()),
             'documentation' => 'docs/RULES.md#'.strtolower($rule->id()),
             'documentation_url' => self::documentationUrl($rule->id()),

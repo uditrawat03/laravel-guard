@@ -45,8 +45,16 @@ final class UiDashboardTest extends TestCase
 
     public function test_authorized_user_can_open_package_dashboard_and_asset(): void
     {
-        $this->get('/_guard')->assertOk()->assertSee('Laravel Guard')->assertSee('No scan evidence yet');
-        $this->get('/_guard/assets/app.css')->assertOk()->assertHeader('Content-Type', 'text/css; charset=UTF-8');
+        $this->get('/_guard')
+            ->assertOk()
+            ->assertSee('Laravel Guard')
+            ->assertSee('No scan evidence yet')
+            ->assertSee('<main>', false)
+            ->assertSee('aria-label="Security dashboard"', false);
+        $this->get('/_guard/assets/app.css')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/css; charset=UTF-8')
+            ->assertSee('summary:focus-visible');
         $this->assertContains('throttle:laravel-guard-ui', app('router')->getRoutes()->getByName('laravel-guard.ui.overview')->gatherMiddleware());
         $this->assertContains('throttle:laravel-guard-ui-scan', app('router')->getRoutes()->getByName('laravel-guard.ui.scan')->gatherMiddleware());
     }
@@ -77,7 +85,17 @@ final class UiDashboardTest extends TestCase
             ->assertSee('View guidance')
             ->assertSee('Potentially vulnerable')
             ->assertSee('Safer pattern')
+            ->assertSee('Laravel versions')
+            ->assertSee('Narrow suppression')
             ->assertDontSee('<svg', false);
+    }
+
+    public function test_findings_filters_have_accessible_names(): void
+    {
+        $this->get('/_guard/findings')
+            ->assertOk()
+            ->assertSee('aria-label="Filter findings by severity"', false)
+            ->assertSee('aria-label="Filter findings by category"', false);
     }
 
     public function test_doctor_uses_compact_diagnostic_layout(): void

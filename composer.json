@@ -39,7 +39,7 @@
         "stancl/tenancy": "Enables the stancl tenant resolver adapter."
     },
     "autoload": {"psr-4": {"LaravelGuard\\": "src/"}},
-    "autoload-dev": {"psr-4": {"LaravelGuard\\Tests\\": "tests/"}},
+    "autoload-dev": {"psr-4": {"LaravelGuard\\Tests\\": "tests/", "Workbench\\App\\": "workbench/app/"}},
     "extra": {
         "laravel": {
             "providers": ["LaravelGuard\\LaravelGuardServiceProvider"],
@@ -56,6 +56,13 @@
     "archive": {
         "exclude": [
             "/hospital-demo",
+            "/browser-tests",
+            "/workbench",
+            "/testbench.yaml",
+            "/docs/PENDING_FEATURES.md",
+            "/docs/LINKEDIN_POST.md",
+            "/docs/ROADMAP.md",
+            "/docs/GUI_INTERFACE.md",
             "/vendor",
             "/.github",
             "/composer.lock",

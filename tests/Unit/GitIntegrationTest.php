@@ -79,6 +79,74 @@ final class GitIntegrationTest extends TestCase
         $this->assertSame('LG-TEST-002', $changed->all()[0]->ruleId);
     }
 
+    public function test_matches_findings_in_untracked_files_including_spaces(): void
+    {
+        $path = $this->repository.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'Untracked Service.php';
+        file_put_contents($path, "<?php\n\nreturn 'unsafe';\n");
+        $finding = $this->finding($path, 3, 'LG-TEST-003');
+
+        $changed = GitDiff::fromRef('HEAD', $this->repository)
+            ->newFindings((new FindingCollection)->add($finding));
+
+        $this->assertCount(1, $changed);
+    }
+
+    public function test_matches_modified_lines_after_a_file_rename(): void
+    {
+        $renamed = $this->repository.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'RenamedService.php';
+        $this->git(['mv', 'app/Service.php', 'app/RenamedService.php']);
+        file_put_contents($renamed, "<?php\nreturn 'unsafe';\n");
+
+        $changed = GitDiff::fromRef('HEAD', $this->repository)
+            ->newFindings((new FindingCollection)->add($this->finding($renamed, 2, 'LG-TEST-004')));
+
+        $this->assertCount(1, $changed);
+    }
+
+    public function test_deleted_files_do_not_create_new_line_findings(): void
+    {
+        unlink($this->sourcePath());
+
+        $changed = GitDiff::fromRef('HEAD', $this->repository)
+            ->newFindings((new FindingCollection)->add($this->finding($this->sourcePath(), 2, 'LG-TEST-005')));
+
+        $this->assertCount(0, $changed);
+    }
+
+    public function test_baseline_is_loaded_from_the_merge_base_not_the_comparison_tip(): void
+    {
+        $this->git(['branch', 'base-tip']);
+        $this->git(['checkout', '-b', 'feature']);
+        $this->git(['checkout', 'base-tip']);
+        file_put_contents($this->baselinePath(), json_encode([
+            'fingerprints' => ['tip-only'],
+            'findings' => [['fingerprint' => 'tip-only', 'rule_id' => 'LG-TEST-999']],
+        ], JSON_THROW_ON_ERROR));
+        $this->git(['add', '.laravel-guard-baseline.json']);
+        $this->git(['commit', '-m', 'Change baseline on comparison branch']);
+        $this->git(['checkout', 'feature']);
+
+        $snapshot = GitBaseline::fromRef('base-tip', $this->repository, $this->baselinePath());
+
+        $this->assertNotNull($snapshot);
+        $this->assertSame(['historical-fingerprint'], $snapshot->fingerprints);
+    }
+
+    private function finding(string $path, int $line, string $ruleId): SecurityFinding
+    {
+        return new SecurityFinding(
+            $ruleId,
+            'test',
+            Severity::High,
+            Confidence::High,
+            'Changed risk',
+            'A changed line contains a risk.',
+            'Test risk',
+            'Fix the test risk.',
+            new SourceLocation($path, $line),
+        );
+    }
+
     private function git(array $arguments): void
     {
         $command = ['git', '-C', $this->repository, ...$arguments];

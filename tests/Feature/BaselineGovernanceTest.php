@@ -36,7 +36,7 @@ final class BaselineGovernanceTest extends TestCase
         ])->assertSuccessful();
 
         $data = json_decode(file_get_contents($this->baseline), true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame(3, $data['schema_version']);
+        $this->assertSame(4, $data['schema_version']);
         $this->assertSame('security-team', $data['findings'][0]['acceptance']['owner']);
         $this->assertSame('Reviewed fixture risk', $data['findings'][0]['acceptance']['reason']);
         $this->assertNotEmpty($data['findings'][0]['acceptance']['expires_at']);
@@ -48,6 +48,36 @@ final class BaselineGovernanceTest extends TestCase
         $this->artisan('guard:baseline', ['--explain' => $rule])
             ->expectsOutputToContain('Reviewed fixture risk')
             ->assertSuccessful();
+    }
+
+    public function test_baseline_policy_enforces_entry_and_approval_limits(): void
+    {
+        $this->app['config']->set('laravel-guard.baseline_governance.max_entries', 0);
+        $this->artisan('guard:baseline', [
+            '--force' => true,
+            '--reason' => 'Reviewed fixture risk',
+            '--expires' => '+30 days',
+        ])->expectsOutputToContain('policy allows 0')->assertExitCode(2);
+
+        $this->app['config']->set('laravel-guard.baseline_governance.max_entries', 500);
+        $this->app['config']->set('laravel-guard.baseline_governance.required_approvals', 2);
+        $this->artisan('guard:baseline', [
+            '--force' => true,
+            '--reason' => 'Reviewed fixture risk',
+            '--owner' => 'service-owner',
+            '--expires' => '+30 days',
+        ])->expectsOutputToContain('policy requires 2')->assertExitCode(2);
+
+        $this->artisan('guard:baseline', [
+            '--force' => true,
+            '--reason' => 'Reviewed fixture risk',
+            '--owner' => 'service-owner',
+            '--approver' => ['security-reviewer'],
+            '--expires' => '+30 days',
+        ])->assertSuccessful();
+
+        $data = json_decode(file_get_contents($this->baseline), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame(['security-reviewer'], $data['findings'][0]['acceptance']['approvers']);
     }
 
     public function test_prune_removes_resolved_and_expired_entries(): void

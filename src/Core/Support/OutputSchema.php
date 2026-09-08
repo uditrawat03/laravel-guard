@@ -14,7 +14,7 @@ final class OutputSchema
 
     public const BASELINE = 'laravel-guard/baseline';
 
-    public const BASELINE_VERSION = 3;
+    public const BASELINE_VERSION = 4;
 
     public const JUNIT = 'laravel-guard/junit';
 

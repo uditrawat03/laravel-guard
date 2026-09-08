@@ -6,6 +6,7 @@ use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use LaravelGuard\Core\Baseline\BaselineDocument;
+use LaravelGuard\Core\Baseline\BaselinePolicy;
 use LaravelGuard\Core\Contracts\SecurityReporter;
 use LaravelGuard\Core\Findings\Severity;
 use LaravelGuard\Integrations\IntegrationManager;
@@ -27,7 +28,7 @@ final readonly class ConfigurationDoctor
     ) {}
 
     /** @return list<DiagnosticResult> */
-    public function diagnose(?string $output = null): array
+    public function diagnose(?string $output = null, bool $connectivity = false): array
     {
         return [
             ...$this->bootIssues->all(),
@@ -40,7 +41,7 @@ final readonly class ConfigurationDoctor
             ...$this->uploads(),
             ...$this->baseline(),
             ...$this->runtime(),
-            ...$this->operational->diagnose($output),
+            ...$this->operational->diagnose($output, $connectivity),
         ];
     }
 
@@ -198,6 +199,16 @@ final readonly class ConfigurationDoctor
         if (! is_int($ttl) || $ttl < 0) {
             $results[] = $this->error('baseline.default_ttl_days', 'Baseline default_ttl_days must be a non-negative integer.');
         }
+        $policy = null;
+        try {
+            $policy = BaselinePolicy::fromConfig((array) $this->config->get('laravel-guard.baseline_governance', []));
+            foreach ($policy->configurationErrors() as $message) {
+                $results[] = $this->error('baseline.policy', $message);
+            }
+        } catch (\Throwable $error) {
+            $results[] = $this->error('baseline.policy', 'Baseline governance policy has invalid value types: '.$error->getMessage());
+        }
+
         if (! file_exists($path)) {
             return $results;
         }
@@ -219,6 +230,12 @@ final readonly class ConfigurationDoctor
             $missing = array_filter($document->entries, fn ($entry) => $entry->reason === null);
             if ($missing !== []) {
                 $results[] = $this->warning('baseline.reasons', count($missing).' baseline entry or entries have no acceptance reason.');
+            }
+        }
+
+        if ($policy !== null) {
+            foreach ($policy->violations($document) as $message) {
+                $results[] = $this->error('baseline.policy', $message, 'Regenerate or prune the baseline under the configured governance policy.');
             }
         }
 

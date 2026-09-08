@@ -24,7 +24,7 @@ final class OutputSchemaConformanceTest extends TestCase
         $documents = [
             'report-v1.json' => json_decode((new JsonReporter)->render($findings), false, flags: JSON_THROW_ON_ERROR),
             'diff-v1.json' => $this->asJsonValue(SecurityDiff::compare($findings, null, new GitDiff("+++ b/app/Test.php\n@@ -0,0 +1 @@\n+unsafe\n"))),
-            'baseline-v3.json' => $this->asJsonValue(BaselineDocument::fromFindings(
+            'baseline-v4.json' => $this->asJsonValue(BaselineDocument::fromFindings(
                 $findings,
                 'security-team',
                 'Reviewed test risk',

@@ -11,6 +11,7 @@ final class DoctorCommand extends Command
     protected $signature = 'guard:doctor
         {--format=console : console or json}
         {--strict : Fail for warnings as well as errors}
+        {--connectivity : Perform explicit database, cache, queue, and filesystem probes}
         {--output= : Validate a report output file destination}';
 
     protected $description = 'Validate Laravel Guard configuration and optional integrations';
@@ -25,7 +26,7 @@ final class DoctorCommand extends Command
         }
 
         $output = $this->option('output');
-        $results = $doctor->diagnose(is_string($output) ? $output : null);
+        $results = $doctor->diagnose(is_string($output) ? $output : null, (bool) $this->option('connectivity'));
         if ($format === 'json') {
             $this->line(json_encode(['diagnostics' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
         } else {
