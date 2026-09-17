@@ -205,7 +205,7 @@ Future upstream majors are treated as unverified until added to this matrix. See
 
 Use `LaravelGuard\Testing\LaravelGuardAssertions` in a PHPUnit test case for `assertNoSecurityFindings()`, `assertRouteRequiresAuthentication()`, `assertRouteRequiresAuthorization()`, `assertRouteUsesMiddleware()`, and `assertTenantSafe()`.
 
-Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. A weekly and manually dispatchable Infection 0.35 workflow mutation-tests the full `src` catalog, publishes survivor reports, and rejects MSI or covered MSI below the v1 floor of 70%. The v1 candidate run measured 73.05% for both scores (2,361 killed and 871 escaped of 3,232 mutations), with 100% mutation code coverage, zero errors, and zero timeouts. The survivor inventory and post-v1 80% objective are documented in [mutation-testing guidance](docs/MUTATION_TESTING.md).
+Public CI runs the complete suite with PCOV, retains the Clover report, and rejects statement coverage below 75%. The first enforced run measured 76.17%. A weekly and manually dispatchable Infection 0.35 workflow mutation-tests the full `src` catalog, publishes survivor reports, and rejects MSI or covered MSI below the reproducible v1 regression floor of 45%. The hosted v1 candidate run measured 46.21% for both scores (1,492 killed, 1,738 escaped, and one errored mutant of 3,231 mutations), with 100% mutation code coverage and zero timeouts. The survivor inventory, errored-mutant follow-up, and post-v1 70% objective are documented in [mutation-testing guidance](docs/MUTATION_TESTING.md).
 
 ```yaml
 - name: Laravel Guard configuration

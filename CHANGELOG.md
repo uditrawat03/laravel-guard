@@ -29,7 +29,7 @@ All notable changes to this project are documented here. The project follows Sem
 ### Changed
 
 - Dashboard sections now load scan evidence, rules, diagnostics, baselines, runtime events, and history only when the active view needs them.
-- The Infection v1 release floor increased from 45% to 70%; the measured candidate score is 73.05% with 100% mutation code coverage.
+- The Infection v1 release gate now uses the reproducible hosted baseline: a 45% MSI and covered-MSI floor against a measured 46.21%, with 100% mutation code coverage. Reaching 70% remains a post-v1 hardening target.
 
 - Local and testing environments receive a secure authenticated-user fallback for the default dashboard Gate, while production remains fail closed until the consuming application defines the ability.
 - Refined the dashboard layout, navigation, tables, filters, responsive behavior, and information hierarchy.

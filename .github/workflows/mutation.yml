@@ -21,7 +21,7 @@ jobs:
       - run: composer update --prefer-dist --no-interaction
       - run: mkdir -p build
       - name: Enforce mutation score and timeout budgets
-        run: vendor/bin/infection --show-mutations=0 --log-verbosity=default
+        run: vendor/bin/infection --show-mutations=0 --log-verbosity=all
       - uses: actions/upload-artifact@v6
         if: ${{ always() }}
         with:
